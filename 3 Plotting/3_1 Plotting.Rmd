@@ -1,5 +1,5 @@
 ---
-title: "Plotting"
+title: "3.1 Plotting"
 author: "Dan Aurell"
 date: "2023-04-06"
 output:   

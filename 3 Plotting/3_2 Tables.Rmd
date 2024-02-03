@@ -104,7 +104,7 @@ df_tbl <- gt(df3)
 df_rtf <- df_tbl %>%
   as_rtf()
 
-# my_conn <- file("./outputs/tables/TableS1_2023-05-29.RTF", "w")
-# writeLines(df_rtf, my_conn)
-# close(my_conn)
+my_conn <- file("./outputs/tables/Table2_2024-02-03.RTF", "w")
+writeLines(df_rtf, my_conn)
+close(my_conn)
 ```

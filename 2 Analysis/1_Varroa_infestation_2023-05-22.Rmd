@@ -1,0 +1,417 @@
+---
+title: "1_Varroa_infestation_2023-05-22"
+author: "Dan Aurell"
+date: "2023-05-22"
+output:   
+  html_document: 
+    keep_md: yes
+---
+
+# Setup
+
+```{r}
+library(MASS)
+library(tidyverse)
+library(lme4)
+library(boot)
+library(emmeans)
+library(broom)
+library(DHARMa)
+```
+
+Vector of queen events
+```{r}
+# From "collated qlessness" sheet
+
+# Any colonies that became queenless between day 0 and 42
+qless <- c("D8", "RC1", "D21", "D24", "C6", "BC15")
+
+```
+
+```{r}
+datum <- read.csv("../2 Analysis/data_prepped/datum_prepped.csv")
+```
+
+Check treatment group of the colonies that were removed
+```{r}
+datum %>% 
+  filter(days == 0, col_no %in% qless)
+
+# 4 were in Apivar
+# 2 were in Combination
+```
+
+
+```{r, include=FALSE}
+datum$trt <- factor(datum$trt , levels=c("Apivar", "Apiguard_Api", "AEC"))
+# datum$trt <- factor(datum$trt , levels=c("Apiguard_Api", "AEC", "Apivar"))
+
+# So that days is treated as categorical in models
+datum$days <- factor(datum$days)
+```
+
+Data prep for phor, infest, bees modeling
+```{r}
+tempdatum <- datum %>% 
+  filter(days %in% c(0,21,42),
+         !(col_no %in% qless)
+         )
+
+# Simple sample size calculation to respond to reviewer
+# Relevant variables with same n: trt days mites_recov_3_washes bees
+
+tempdatum %>% 
+  group_by(days, trt) %>% 
+  summarize(n= n())
+
+
+# Different n: infest_200
+tempdatum %>% 
+  filter(!is.na(infest_200)) %>% 
+  group_by(days, trt) %>% 
+  summarize(n= n())
+
+
+
+```
+
+Quick descriptive stats
+```{r}
+tempdatum %>%
+ summarise(
+ mean = mean(est_bee_num_by_wt),
+ mini = min(est_bee_num_by_wt),
+ maxi = max(est_bee_num_by_wt),
+ variance = var(est_bee_num_by_wt),
+ sd = sqrt(variance)
+ )
+
+
+```
+
+
+
+
+# Treatment Effects on Varroa Infestation
+## Varroa on adult bees
+
+### Poisson vs. Negative Binomial
+
+Checking for overdispersion - 
+```{r}
+dispersionstats <- datum %>%
+    filter(days %in% c(0,21,42),
+         !(col_no %in% qless)) %>% 
+ summarise(
+ means = mean(mites_recov_3_washes),
+ variances = var(mites_recov_3_washes),
+ ratio = variances/means)
+
+# Variance-to-mean ratio of 22.5; use negative binomial distribution instead of Poisson
+```
+
+
+Fit Poisson and negative binomial models
+```{r}
+m.phor.pois1 <- glmer(mites_recov_3_washes ~ 
+                     trt + 
+                     days + 
+                     trt:days + 
+                     (1 | col_no), 
+                   data = tempdatum, family = poisson)
+
+
+m.phor.nb1 <- glmer.nb(mites_recov_3_washes ~ 
+                     trt + 
+                     days + 
+                     trt:days + 
+                     (1 | col_no), 
+                   data = tempdatum)
+
+summary(m.phor.pois1)
+summary(m.phor.nb1)
+
+```
+
+
+Plot residuals and see if it's zero-inflated.
+
+```{r}
+
+```
+
+Comparing nb to poisson with deviance F-test
+```{r}
+# Test whether nb is a stat sig better fit than poisson:
+anova(m.phor.nb1, m.phor.pois1)
+# Yes, highly significantly better (p<2.2e-16)
+
+summary(m.phor.pois1)$coefficients
+summary(m.phor.nb1)$coefficients
+# The p values for my predictors went up, but the fit is way better
+  # This makes sense... Poisson is not conservative enough with overdispersed data
+# The parameter estimates stay pretty much the same. Good.
+```
+
+### Fit model that uses number of bees in sample as the offset
+
+```{r}
+# A priori model
+m.phor.nb1 <- glmer.nb(mites_recov_3_washes ~ 
+                     trt + 
+                     days + 
+                     trt:days + 
+                     (1 | col_no), 
+                   data = tempdatum)
+summary(m.phor.nb1)
+
+# Take into account the number of bees per sample
+
+m.phor <- glmer.nb(mites_recov_3_washes ~ 
+                     trt + 
+                     days + 
+                     trt:days + 
+                     offset(log(est_bee_num_by_wt_floor)) +
+                     (1 | col_no),
+                   data = tempdatum)
+summary(m.phor) # Very different coefficients... because varroa per bee rather than per sample...
+  # Check on this interpretation
+
+
+# Test significance of trt:days interaction
+
+## Fit model that omits trt:days interaction
+
+m.phor.0 <- glmer.nb(mites_recov_3_washes ~ 
+                     trt + 
+                     days + 
+                     # trt:days + 
+                     offset(log(est_bee_num_by_wt_floor)) +
+                     (1 | col_no),
+                   data = tempdatum)
+summary(m.phor.0)
+
+anova(m.phor, m.phor.0) 
+# There was a significant interaction between day and treatment (p=2.251e-05) when tested by ANOVA. Therefore we analyzed each date separately.
+
+# Final model is m.phor ".f" means "final"
+m.phor.f <- m.phor
+```
+
+### ANOVA of phor within day
+
+```{r}
+#joint_tests(m.phor, by = "days") 
+# Duplicate row names not allowed error
+
+#joint_tests(m.phor, offset = log(100))
+# Error in .find.by.rows(args, by) : 'by' variables are not all in the grid
+
+#joint_tests(m.phor, offset = log(100), by = "days")
+# Error in .find.by.rows(args, by) : 'by' variables are not all in the grid
+
+# Used the joint_tests documentation to recreate the individual steps of what joint_tests does, adding in the offset at the appropriate step: https://cran.r-hub.io/web/packages/emmeans/emmeans.pdf
+
+emm.phor.f <- emmeans(m.phor.f, pairwise ~ trt | days)
+con.phor.f <- contrast(emm.phor.f, offset = log(100))
+test(con.phor.f, joint = TRUE, by = "days")
+# On day 0, no significant differences between treatments (F ratio 2,Inf = 0.187, P=0.8291)
+# On day 21, significant differences between treatments (F ratio 2,Inf = 9.388, P=0.0001)
+# On day 42, no significant differences between treatments (F ratio 2,Inf = 2.542, P=0.0787)
+
+
+```
+
+
+On day X, yes/no significant differences between treatments (F = , P= )
+
+```{r}
+m.phor_day0 <- glm.nb(mites_recov_3_washes ~ 
+                     trt + 
+                     offset(log(est_bee_num_by_wt_floor)),
+                   data = tempdatum, subset = days == 0)
+summary(aov(m.phor_day0))
+
+# On day 0, no significant differences between treatments (F 2,38 = 0.165, P=0.849)
+
+m.phor_day21 <- glm.nb(mites_recov_3_washes ~ 
+                     trt + 
+                     offset(log(est_bee_num_by_wt_floor)),
+                   data = tempdatum, subset = days == 21)
+summary(aov(m.phor_day21))
+# On day 21, yes significant differences between treatments (F 2,38 = 6.674, P= 0.00328)
+
+m.phor_day42 <- glm.nb(mites_recov_3_washes ~ 
+                     trt + 
+                     offset(log(est_bee_num_by_wt_floor)),
+                   data = tempdatum, subset = days == 42)
+summary(aov(m.phor_day42))
+
+# On day 42, no significant differences between treatments (F 2,34= 1.723, P= 0.194)
+
+```
+
+
+
+
+## Infestation of Brood
+
+Checking for overdispersion
+```{r}
+dispersionstats2 <- datum %>%
+    filter(days %in% c(0,21,42),
+         !(col_no %in% qless)) %>% 
+ summarise(
+ means = mean(infest_200, na.rm = T),
+ variances = var(infest_200, na.rm = T),
+ ratio = variances/means)
+
+# Variance-to-mean ratio of 14.2; use negative binomial distribution instead of Poisson
+```
+
+```{r}
+# a priori model
+m.infest.nb1 <- glmer.nb(infest_200 ~ 
+                     trt + 
+                     days + 
+                     trt:days + 
+                     (1 | col_no),
+                   data = tempdatum)
+summary(m.infest.nb1)
+
+m.infest.nb0 <- glmer.nb(infest_200 ~ 
+                     trt + 
+                     days + 
+                     # trt:days + 
+                     (1 | col_no),
+                   data = tempdatum)
+
+anova(m.infest.nb1, m.infest.nb0)
+
+# Final model
+m.infest.f <- m.infest.nb1
+
+```
+
+### ANOVA of infest within day
+
+```{r}
+joint_tests(m.infest.f) 
+# Does not give a duplicate row names error
+
+# By doing this within days, this may be the ANOVA F test that the reviewer asks for
+
+joint_tests(m.infest.f, by = "days") 
+
+# Testing that this method (used for phor) gives same result
+emm.infest.f <- emmeans(m.infest.f, pairwise ~ trt | days)
+con.infest.f <- contrast(emm.infest.f, offset = log(100))
+test(con.infest.f, joint = TRUE, by = "days")
+# Yes, exactly the same output. This confirms the workflow used above for phor
+
+# On day 0, no significant differences (F ratio 2,Inf=0.004 , P=0.9957)
+# On day 21, yes significant differences (F ratio 2,Inf= 5.678, P=0.0034)
+# On day 42, no significant differences (F ratio 2,Inf= 0.427, P=0.6525)
+```
+
+
+On day X, yes/no significant differences between treatments (F = , P= )
+
+
+
+```{r}
+m.infest_day0 <- glm.nb(infest_200 ~ 
+                     trt,
+                   data = tempdatum, subset = days == 0)
+summary(aov(m.infest_day0))
+
+# On day 0, no significant differences between treatments (F 2,38= 0.001, P= 0.999)
+
+m.infest_day21 <- glm.nb(infest_200 ~ 
+                     trt,
+                   data = tempdatum, subset = days == 21)
+summary(aov(m.infest_day21))
+
+# On day 21, yes significant differences between treatments (F 2,29= 6.348, P= 0.00517)
+
+m.infest_day42 <- glm.nb(infest_200 ~ 
+                     trt,
+                   data = tempdatum, subset = days == 42)
+summary(aov(m.infest_day42))
+
+# On day 42, no significant differences between treatments (F 2,34= 0.353, P= 0.705)
+
+```
+
+
+
+
+
+
+# Summarize models for text, tables, and plotting
+
+```{r}
+# Estimated marginal means (and CIs) for text, tables, and plotting
+# For the models which included an offset, report the emm's and CIs for a hypothetical sample of 100 bees
+# This method is based on the emmeans documentation at: https://cran.r-project.org/web/packages/emmeans/vignettes/sophisticated.html#offsets
+
+emplot_phor <- emmip(m.phor.f, trt~days, type = "response", CIs = TRUE, plotit = FALSE, offset = log(100))
+emplot_phor$days <- as.numeric(as.character(emplot_phor$days))
+emplot_phor$trt <- factor(emplot_phor$trt, levels = c("Apivar", "AEC", "Apiguard_Api"))
+levels(emplot_phor$trt) # check order of factors
+
+emplot_infest <- emmip(m.infest.f, trt~days, type = "response", CIs = TRUE, plotit = FALSE)
+emplot_infest$days <- as.numeric(as.character(emplot_infest$days))
+emplot_infest$trt <- factor(emplot_infest$trt, levels = c("Apivar", "AEC", "Apiguard_Api"))
+levels(emplot_infest$trt) # check order of factors
+# This is simply the number of infested cells per 200 worker cells
+# Now scale this down to infested per 100 worker cells
+emplot_infest$yvar <- emplot_infest$yvar/2
+emplot_infest$LCL <- emplot_infest$LCL/2
+emplot_infest$UCL <- emplot_infest$UCL/2
+
+
+```
+
+
+# Save these summarized tables of model estimates to their own CSVs
+
+```{r}
+write.csv(emplot_phor, "../3 Plotting/data_analyzed/emplot_phor.csv")
+write.csv(emplot_infest, "../3 Plotting/data_analyzed/emplot_infest.csv")
+```
+
+# Post-hoc comparisons
+
+```{r}
+# Phor within day
+emmeans(m.phor.f, pairwise ~ trt | days, type = "response")$contrasts
+confint(emmeans(m.phor.f, pairwise ~ trt | days, type = "response"))$contrasts
+
+# Added to test idea that the emmeans is using asymptotic degrees of freedom
+emmeans(m.phor.f, pairwise ~ trt | days, type = "response")$contrasts
+emmeans(m.phor.f, pairwise ~ trt | days, type = "response", lmer.df = "asymptotic")$contrasts
+# Yes, same results
+
+# Does Satterthwaite method work? Nope, defaults to asymptotic
+emmeans(m.phor.f, pairwise ~ trt | days, type = "response")$contrasts
+emmeans(m.phor.f, pairwise ~ trt | days, type = "response", lmer.df = "satterthwaite")$contrasts
+
+
+# Phor within treatment
+emmeans(m.phor.f, pairwise ~ days | trt, type = "response")$contrasts
+confint(emmeans(m.phor.f, pairwise ~ days | trt, type = "response"))$contrasts
+
+
+# Infest within day
+emmeans(m.infest.f, pairwise ~ trt | days, type = "response")$contrasts
+confint(emmeans(m.infest.f, pairwise ~ trt | days, type = "response"))$contrasts
+
+# Infest within treatment
+emmeans(m.infest.f, pairwise ~ days | trt, type = "response")$contrasts
+confint(emmeans(m.infest.f, pairwise ~ days | trt, type = "response"))$contrasts
+
+
+```
+
+

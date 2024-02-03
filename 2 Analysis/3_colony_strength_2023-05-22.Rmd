@@ -1,0 +1,451 @@
+---
+title: "3_colony_strength_2023-05-22"
+author: "Dan Aurell"
+date: "2023-05-22"
+output:   
+  html_document: 
+    keep_md: yes
+---
+
+# Last modified
+
+# Setup
+
+```{r}
+library(MASS)
+library(tidyverse)
+library(lme4)
+library(boot)
+library(emmeans)
+library(broom)
+library(DHARMa)
+```
+
+Vector of queen events
+```{r}
+# From "collated qlessness" sheet
+
+# Any colonies that became queenless between day 0 and 42
+qless <- c("D8", "RC1", "D21", "D24", "C6", "BC15")
+
+```
+
+```{r}
+datum <- read.csv("../2 Analysis/data_prepped/datum_prepped.csv")
+```
+
+```{r, include=FALSE}
+datum$trt <- factor(datum$trt , levels=c("Apivar", "Apiguard_Api", "AEC"))
+# datum$trt <- factor(datum$trt , levels=c("Apiguard_Api", "AEC", "Apivar"))
+
+# So that days is treated as categorical in models
+datum$days <- factor(datum$days)
+```
+
+Data prep for phor, infest, bees modeling
+```{r}
+tempdatum <- datum %>% 
+  filter(days %in% c(0,21,42),
+         !(col_no %in% qless)
+         ) %>%
+  mutate(tot = wk_cells_infested_estimate + phoretic_mites_num_estimate,
+           perc_of_mitepop_wkbrd = 100*wk_cells_infested_estimate/tot
+           )
+```
+
+
+# Treatment Effects on Colony Strength
+## Adult Bee Population
+
+### Backwards variable testing starting from a priori model
+
+```{r}
+# A priori model (REML)
+m.bee.a <- lmer(bees_frames ~ 
+                 trt + 
+                 days + 
+                 trt:days +
+                 (1 | col_no), data = tempdatum)
+summary(m.bee.a) # 119 obs, 41 groups
+
+# I think the inclusion of the random effect of colony number is essential to avoid pseudoreplication, but Zach seemed to think it may be a case of overfitting
+
+# Let's test out an alternate model
+m.bee.alm <- lm(bees_frames ~ 
+                 trt + 
+                 days + 
+                 trt:days, 
+                data = tempdatum)
+summary(m.bee.alm) # 110 degrees of freedom
+
+# What's our true number of samples for the effect of time, the effect of treatment, and the time x treatment interaction? Refer back to Steury notes
+
+# Temporal pseudoreplication
+# Repeated measures design
+# lm(Height ~ Age + Sex) # Pseudoreplicated with respect to Sex, but not Age
+# Interactions not discussed
+# Relevant to winter trial - Usually you don’t have to include random effects but doing so lets you incraese your power
+
+
+
+# Check deletion of interaction (ML)
+m.bee.a.ML <- lmer(bees_frames ~ 
+                 trt + 
+                 days + 
+                 trt:days +
+                 (1 | col_no), data = tempdatum, REML = F)
+
+m.bee.a0.ML <- lmer(bees_frames ~ 
+                 trt + 
+                 days + 
+                 # trt:days +
+                 (1 | col_no), data = tempdatum, REML = F)
+
+anova(m.bee.a.ML, m.bee.a0.ML)
+# The interaction of treatment and experiment day on adult bee population was significant (ChiSq[4]=12.097; P=0.01664) 
+```
+
+### Forward variable selection:
+```{r}
+# Check addition of a Varroa effect
+m.bee.1.ML <- lmer(bees_frames ~ 
+                 trt + 
+                 days + 
+                 trt:days +
+                 pre_phor2 + 
+                 (1 | col_no), data = tempdatum, REML = F)
+
+anova(m.bee.1.ML, m.bee.a.ML)
+# the model fit was significantly improved by including the effect of day-0 infestation rate on bee population (ChiSq=25.04; P=5.615e-07)
+
+# Check addition of a Varroa:days effect
+m.bee.2.ML <- lmer(bees_frames ~ 
+                 trt + 
+                 days + 
+                 trt:days +
+                 pre_phor2 + 
+                 pre_phor2:days +
+                 (1 | col_no), data = tempdatum, REML = F)
+
+anova(m.bee.1.ML, m.bee.2.ML)
+# The interaction of day-0 infestation rate and day on bee population also significantly improved model fit (ChiSq=7.8802, P=0.01945)
+
+# Final model
+m.bee.2 <- lmer(bees_frames ~ 
+                 trt + 
+                 days + 
+                 trt:days +
+                 pre_phor2 + 
+                 pre_phor2:days +
+                 (1 | col_no), data = tempdatum)
+
+summary(m.bee.2)
+
+m.bee.f <- m.bee.2
+
+```
+
+
+Interpret model
+```{r}
+summary(m.bee.f)
+confint(m.bee.f)
+
+```
+
+### ANOVA of bees_frames within day
+
+```{r}
+joint_tests(m.bee.f, by = "days")
+
+# On day 0, no significant differences (F ratio 2,71.27=0.325, P=0.7235)
+# On day 21, yes significant differences (F ratio 2,71.27=5.192, P=0.0079)
+# On day 42, yes significant differences (F ratio 2,77.46=4.516, P=0.0140)
+```
+
+
+On day X, yes/no significant differences between treatments (F = , P= )
+
+```{r}
+m.bee_day0 <- lm(bees_frames ~ trt + pre_phor2,
+                 data = tempdatum, subset = days == 0)
+summary(aov(m.bee_day0))
+
+# On day 0, no significant differences between treatments (F 2,37 = 0.310, P=0.7353)
+
+m.bee_day21 <- lm(bees_frames ~ trt + pre_phor2,
+                 data = tempdatum, subset = days == 21)
+summary(aov(m.bee_day21))
+
+# On day 21, yes significant differences between treatments (F 2,37= 4.124, P= 0.0242)
+
+m.bee_day42 <- lm(bees_frames ~ trt + pre_phor2,
+                 data = tempdatum, subset = days == 42)
+summary(aov(m.bee_day42))
+
+
+# On day 42, no significant differences between treatments (F 2,33= 1.891, P= 0.167)
+  # This is a bit surprising since it's at odds with the emmeans analysis
+```
+
+
+
+## Population of capped worker brood
+
+```{r}
+tempdatum <- datum %>% 
+  filter(days %in% c(0,10,21,42),
+         !(col_no %in% qless)
+         )
+
+tempdatum %>% 
+  group_by(days, trt) %>% 
+  summarize(n= n())
+```
+
+### Backward variable testing
+
+```{r}
+# A priori model (REML)
+m.brood.a <- lmer(wk_frames ~ 
+                   trt + 
+                   days + 
+                   trt:days + 
+                  (1 | col_no), 
+                 data = tempdatum)
+summary(m.brood.a)
+
+
+# Check deletion of interaction (ML)
+m.brood.a0 <- lmer(wk_frames ~ 
+                   trt + 
+                   days + 
+                   # trt:days + 
+                  (1 | col_no), 
+                 data = tempdatum)
+
+anova(m.brood.a, m.brood.a0) # No need any more to specify ML models
+
+# We did not find a significant interaction between treatment and days on worker brood population (ChiSq[6]=10.766; P=0.09588), but because of our experiment designed to examine this effect, we retained the interaction in the model anyway.
+
+# Check deletion of trt, then days
+
+m.brood.a00 <- lmer(wk_frames ~ 
+                   # trt + 
+                   days + 
+                   # trt:days + 
+                  (1 | col_no), 
+                 data = tempdatum)
+
+anova(m.brood.a0, m.brood.a00)
+# Effect of trt not significant (Chisq[2] = 1.84, P=0.3994)
+
+
+
+# Check deletion of days
+m.brood.a000 <- lmer(wk_frames ~ 
+                   trt + 
+                   # days + 
+                   # trt:days + 
+                  (1 | col_no), 
+                 data = tempdatum)
+# DAN Singular
+
+anova(m.brood.a0, m.brood.a000)
+# Significant effect of days (Chisq[3]=192.35, P<2.2e-16).
+```
+
+### Forward variable selection
+
+```{r}
+# Check addition of a Varroa effect
+m.brood.1 <- lmer(wk_frames ~ 
+                   trt + 
+                   days + 
+                   trt:days + 
+                   pre_phor2 +
+                  (1 | col_no), 
+                 data = tempdatum)
+
+anova(m.brood.a, m.brood.1)
+# The addition of Varroa was highly significant (ChiSq[1]=13.767, P=0.000207)
+
+
+# Check addition of a Varroa:days effect
+m.brood.2 <- lmer(wk_frames ~ 
+                   trt + 
+                   days + 
+                   trt:days + 
+                   pre_phor2 +
+                   pre_phor2:days +
+                  (1 | col_no), 
+                 data = tempdatum)
+anova(m.brood.2, m.brood.1)
+# The addition of Varroa:days was not significant (ChiSq[3]=6.926, P=0.07429)
+
+# Now that have added a Varroa effect, test deletion of the treatment:days interaction backwards
+
+m.brood.3 <- lmer(wk_frames ~ 
+                   trt + 
+                   days + 
+                   # trt:days + 
+                   pre_phor2 +
+                  (1 | col_no), 
+                 data = tempdatum)
+
+anova(m.brood.3, m.brood.1)
+# Also in the presence of the pre_Varroa effect, there is a P=0.096 effect of
+
+
+# Check that the effect estimate of trt:time is robust to the addition of the pre_Varroa effect
+s.1 <- summary(m.brood.a)
+s.2<- data.frame(s.1$coefficients)
+s.3 <- data.frame(confint(m.brood.a))[3:14,]
+s.4 <- cbind(s.2, s.3)
+
+# Now estimates for model including the pre_Varroa effect
+s.5 <- summary(m.brood.1)
+s.6 <- data.frame(s.5$coefficients)[-7,]
+
+# Bind together
+s.7 <- cbind(s.4, s.6)
+
+# The estimates of treatment effect are remarkably similar with the addition of pre_Varroa as a predictor of brood area. Only the new estimate of the intercept moved outside the bounds of the original 95% CI, and all the others stayed remarkably similar.
+
+anova(m.brood.1)
+
+```
+
+```{r}
+# Final model
+
+# Preferred model: m.brood.1.ML
+# Make REML version
+m.brood.1 <- lmer(wk_frames ~ 
+                   trt + 
+                   days + 
+                   trt:days + 
+                   pre_phor2 +
+                   # pre_phor2:days +
+                  (1 | col_no), 
+                 data = tempdatum)
+
+summary(m.brood.1)
+confint(m.brood.1)
+
+# Final model is m.brood.1
+m.brood.f <- m.brood.1
+```
+
+
+
+# Look at residuals of preferred models
+
+```{r}
+hist(resid(m.bee.f)) # Not too off from normal dist
+hist(resid(m.brood.f)) # Looks pretty normal
+```
+
+### No need to do ANOVA of wk_frames within day
+- Because the interaction wasn't significant
+
+
+# Tidy the output of models
+To be able to report predicted response
+
+```{r}
+# Bees
+
+emres_bees<- emmeans(m.bee.f, pairwise ~ trt | days, type = "response")$emmeans %>% 
+  tidy()
+
+emmeans(m.bee.f, pairwise ~ trt | days, type = "response")$contrasts
+confint(emmeans(m.bee.f, pairwise ~ trt | days, type = "response"))$contrasts
+
+
+## Day 42 frames of bees estimates
+### AEC 4.292991
+### Apivar 2.912365
+### Combination 2.951125
+
+## What percentage of bees were lacking in Apivar?
+100*(4.292991-2.912365)/4.292991 #32%
+
+# 1.38 missing frames of bees. Convert to number of bees
+# Beebook reference
+2430*1.38 # 3353
+
+## What percentage of bees were lacking in Combination?
+100*(4.292991-2.951125)/4.292991 # 31%
+
+## Combination missing 1.34 frames of bees. Convert to number of bees
+## Beebook conversion
+2430*1.34 # 3256 bees missing
+
+
+## Combination missing how many frames of brood on Day 10?
+1.2-0.73 # 0.47 frames of brood
+
+
+880*3.8*2 # 6688 cells of worker brood per frame
+
+## Combination missing 0.47 frames of brood on Day 10. Convert to number of bees
+6688*0.47 #3143 brood missing
+
+
+
+
+
+
+
+
+## Over time
+emmeans(m.bee.f, pairwise ~ days | trt, type = "response")$contrasts
+
+# Bees a priori
+
+emres_bees_apriori<- emmeans(m.bee.a, pairwise ~ trt | days, type = "response")$emmeans %>% 
+  tidy()
+
+emmeans(m.bee.a, pairwise ~ trt | days, type = "response")$contrasts
+confint(emmeans(m.bee.a, pairwise ~ trt | days, type = "response"))$contrasts
+
+# Brood
+
+
+
+emres_brood<- emmeans(m.brood.f, pairwise ~ trt | days, type = "response")$emmeans %>% 
+  tidy()
+
+emmeans(m.brood.f, pairwise ~ trt | days, type = "response")$contrasts
+confint(emmeans(m.brood.f, pairwise ~ trt | days, type = "response"))$contrasts
+# Note that we have a significant comparison here even though the inclusion of day:trt effect in the overall model was not significant.
+```
+
+# Summarize models for plotting
+
+```{r}
+emplot_bees <- emmip(m.bee.f, trt~days, type = "response", CIs = TRUE, plotit = FALSE)
+emplot_bees$days <- as.numeric(as.character(emplot_bees$days))
+emplot_bees$trt <- factor(emplot_bees$trt, levels = c("Apivar", "AEC", "Apiguard_Api"))
+levels(emplot_bees$trt) # check order of factors
+
+emplot_bees_apriori <- emmip(m.bee.a, trt~days, type = "response", CIs = TRUE, plotit = FALSE)
+emplot_bees_apriori$days <- as.numeric(as.character(emplot_bees_apriori$days))
+emplot_bees_apriori$trt <- factor(emplot_bees_apriori$trt, levels = c("Apivar", "AEC", "Apiguard_Api"))
+levels(emplot_bees_apriori$trt) # check order of factors
+
+emplot_brood <- emmip(m.brood.f, trt~days, type = "response", CIs = TRUE, plotit = FALSE)
+emplot_brood$days <- as.numeric(as.character(emplot_brood$days))
+emplot_brood$trt <- factor(emplot_brood$trt, levels = c("Apivar", "AEC", "Apiguard_Api"))
+levels(emplot_brood$trt) # check order of factors
+```
+
+
+# Save these summarized tables of model estimates to their own CSVs
+
+```{r}
+write.csv(emplot_bees, "../3 Plotting/data_analyzed/emplot_bees.csv")
+write.csv(emplot_brood, "../3 Plotting/data_analyzed/emplot_brood.csv")
+```
+

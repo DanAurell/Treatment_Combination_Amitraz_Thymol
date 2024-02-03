@@ -1,0 +1,199 @@
+---
+title: "2023-04-16 Supplemental plotting code"
+author: "Dan Aurell"
+date: "2023-04-16"
+output: html_document
+---
+
+###### Pulled from main script on 2023-04-16
+## These individual graphs are no longer needed now that I am using ggarrange to put the multi-pane graphs together
+
+# Phor
+
+```{r}
+pd <- position_dodge(2)
+
+p <- emplot_phor %>% 
+ggplot(mapping = aes(y = yvar*100/321.3, x = days, color = trt)) +  
+  # , group = trt probably not necessary
+  scale_colour_manual(
+    limits = c("Apivar", "AEC", "Apiguard_Api"),
+    labels = c("Apivar", "Amitraz E.C.", "Combination"),
+    values = c("black", "black", "#00BA38"), 
+    aesthetics = "color"
+  ) +
+
+  scale_linetype_manual(
+    limits = c("Apivar", "AEC", "Apiguard_Api"),
+    labels = c("Apivar", "Amitraz E.C.", "Combination"),
+    values=c("solid", "dashed", "solid")
+    ) +
+  
+  scale_shape_manual(
+    limits = c("Apivar", "AEC", "Apiguard_Api"),
+    labels = c("Apivar", "Amitraz E.C.", "Combination"),
+    values = c(16, 21, 16)) +  
+  
+  geom_hline(yintercept = 3, linetype = 2, colour = "red") +
+  geom_line(aes(linetype = trt), position=pd, size = 1.5) +
+  geom_errorbar(aes(ymin=LCL*100/321.3, ymax=UCL*100/321.3), width=2, position=pd, size = 1) +
+  geom_point(aes(shape=trt), position=pd, fill="white", size = 3, stroke = 1) +
+  scale_x_continuous(breaks = c(0, 21, 42)) +
+  theme_classic(base_size = 30) +
+  ylab("Varroa / 100 bees") +
+  xlab("Experiment day")
+
+
+
+
+p + theme(legend.title = element_blank()) # No need for "treatment" label
+# ggsave("outputs/phor_off_legend 2023-04-12.png", width = 12, height = 8.625, units = "in")
+
+
+
+p + theme(legend.position = "none") # For when I want to export a version sans legend
+# ggsave("outputs/phor_off_no_legend 2023-04-12.png", width = 12, height = 8.625, units = "in")
+
+```
+
+
+
+
+# Infest
+
+```{r}
+p <- emplot_infest %>% 
+ggplot(mapping = aes(y = yvar/2, x = days, color = trt)) +  
+  # , group = trt probably not necessary
+  scale_colour_manual(
+    limits = c("Apivar", "AEC", "Apiguard_Api"),
+    labels = c("Apivar", "Amitraz E.C.", "Combination"),
+    values = c("black", "black", "#00BA38"), 
+    aesthetics = "color"
+  ) +
+
+  scale_linetype_manual(
+    limits = c("Apivar", "AEC", "Apiguard_Api"),
+    labels = c("Apivar", "Amitraz E.C.", "Combination"),
+    values=c("solid", "dashed", "solid")
+    ) +
+  
+  scale_shape_manual(
+    limits = c("Apivar", "AEC", "Apiguard_Api"),
+    labels = c("Apivar", "Amitraz E.C.", "Combination"),
+    values = c(16, 21, 16)) +  
+  
+  geom_line(aes(linetype = trt), position=pd, size = 1.5) +
+  geom_errorbar(aes(ymin=LCL/2, ymax=UCL/2), width=2, position=pd, size = 1) +
+  geom_point(aes(shape=trt), position=pd, fill="white", size = 3, stroke = 1) +
+  
+  scale_x_continuous(breaks = c(0, 21, 42)) +
+  
+  theme_classic(base_size = 30) +
+  
+  ylab("Varroa-infested cells / 100 cells") +
+  xlab("Experiment day")
+
+
+p + theme(legend.title = element_blank()) # No need for "treatment" label
+# ggsave("outputs/infest_legend 2023-04-07.png", width = 12, height = 8.625, units = "in")
+
+p + theme(legend.position = "none") # For when I want to export a version sans legend
+# ggsave("outputs/infest_no_legend 2023-04-07.png", width = 12, height = 8.625, units = "in")
+
+```
+
+
+# Bees
+
+```{r}
+p <- emplot_bees %>% 
+ggplot(mapping = aes(y = yvar, x = days, color = trt)) +  
+  # , group = trt probably not necessary
+  scale_colour_manual(
+    limits = c("Apivar", "AEC", "Apiguard_Api"),
+    labels = c("Apivar", "Amitraz E.C.", "Combination"),
+    values = c("black", "black", "#00BA38"), 
+    aesthetics = "color"
+  ) +
+
+  scale_linetype_manual(
+    limits = c("Apivar", "AEC", "Apiguard_Api"),
+    labels = c("Apivar", "Amitraz E.C.", "Combination"),
+    values=c("solid", "dashed", "solid")
+    ) +
+  
+  scale_shape_manual(
+    limits = c("Apivar", "AEC", "Apiguard_Api"),
+    labels = c("Apivar", "Amitraz E.C.", "Combination"),
+    values = c(16, 21, 16)) +  
+  
+  geom_line(aes(linetype = trt), position=pd, size = 1.5) +
+  geom_errorbar(aes(ymin=LCL, ymax=UCL), width=2, position=pd, size = 1) +
+  geom_point(aes(shape=trt), position=pd, fill="white", size = 3, stroke = 1) +
+  
+  scale_x_continuous(breaks = c(0, 21, 42)) +
+  
+  theme_classic(base_size = 30) +
+  
+  ylab("Frames of bees") +
+  xlab("Experiment day")
+
+
+p + theme(legend.title = element_blank()) # No need for "treatment" label
+# ggsave("outputs/bees_legend 2023-04-07.png", width = 12, height = 8.625, units = "in")
+
+p + theme(legend.position = "none") # For when I want to export a version sans legend
+# ggsave("outputs/bees_no_legend 2023-04-07.png", width = 12, height = 8.625, units = "in")
+
+```
+
+
+
+# Brood
+
+```{r}
+
+p <- emplot_brood %>% 
+ggplot(mapping = aes(y = yvar, x = days, color = trt)) +  
+  # , group = trt probably not necessary
+  scale_colour_manual(
+    limits = c("Apivar", "AEC", "Apiguard_Api"),
+    labels = c("Apivar", "Amitraz E.C.", "Combination"),
+    values = c("black", "black", "#00BA38"), 
+    aesthetics = "color"
+  ) +
+
+  scale_linetype_manual(
+    limits = c("Apivar", "AEC", "Apiguard_Api"),
+    labels = c("Apivar", "Amitraz E.C.", "Combination"),
+    values=c("solid", "dashed", "solid")
+    ) +
+  
+  scale_shape_manual(
+    limits = c("Apivar", "AEC", "Apiguard_Api"),
+    labels = c("Apivar", "Amitraz E.C.", "Combination"),
+    values = c(16, 21, 16)) +  
+  
+  geom_line(aes(linetype = trt), position=pd, size = 1.5) +
+  geom_errorbar(aes(ymin=LCL, ymax=UCL), width=2, position=pd, size = 1) +
+  geom_point(aes(shape=trt), position=pd, fill="white", size = 3, stroke = 1) +
+  
+  scale_x_continuous(breaks = c(0, 10, 21, 42)) +
+  
+  theme_classic(base_size = 30) +
+  
+  ylab("Frames of capped brood") +
+  xlab("Experiment day")
+
+
+p + theme(legend.title = element_blank()) # No need for "treatment" label
+# ggsave("outputs/brood_legend 2023-04-07.png", width = 12, height = 8.625, units = "in")
+
+p + theme(legend.position = "none") # For when I want to export a version sans legend
+# ggsave("outputs/brood_no_legend 2023-04-07.png", width = 12, height = 8.625, units = "in")
+
+```
+
+
+

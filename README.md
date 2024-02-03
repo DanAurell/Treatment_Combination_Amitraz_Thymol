@@ -1,5 +1,6 @@
-# Treatment_Combination_Amitraz_Thymol
-Data and analysis for an experiment on control of Varroa mites in honey bee colonies using a combination of treatments based on amitraz and thymol. Research by Dan Aurell, Clint Wall, Selina Bruckner, and Geoffrey R. Williams.
+# Data and code from: Combined treatment with amitraz and thymol to manage *Varroa destructor* mites (Acari: Varroidae) in *Apis mellifera* honey bee colonies (Hymenoptera: Apidae).
+
+Data and analysis code for an experiment on control of Varroa mites in honey bee colonies using a combination of treatments based on amitraz and thymol. Research by Dan Aurell, Clint Wall, Selina Bruckner, and Geoffrey R. Williams.
 
 ### Structure of GitHub Repository
 

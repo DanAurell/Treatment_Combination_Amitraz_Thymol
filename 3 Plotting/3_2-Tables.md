@@ -10,39 +10,80 @@ output:
 
 # Setup
 
-```{r}
+
+```r
 library(tidyverse)
+```
+
+```
+## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
+## ✔ ggplot2 3.4.1     ✔ purrr   1.0.1
+## ✔ tibble  3.1.8     ✔ dplyr   1.1.0
+## ✔ tidyr   1.3.0     ✔ stringr 1.5.0
+## ✔ readr   2.1.4     ✔ forcats 1.0.0
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+```
+
+```r
 library(gt)
 ```
 
 Required to read in
 
-```{r}
+
+```r
 emplot_phor <- read.csv("./data_analyzed/emplot_phor.csv")
 emplot_infest <- read.csv("./data_analyzed/emplot_infest.csv")
 emplot_bees <- read.csv("./data_analyzed/emplot_bees.csv")
 emplot_brood <- read.csv("./data_analyzed/emplot_brood.csv")
-
 ```
 
 
 # Add variables
 
-```{r}
+
+```r
 emplot_phor$variable <- "varroa_adults"
 emplot_infest$variable <- "varroa_brood"
 emplot_bees$variable <- "frames_bees"
 emplot_brood$variable <- "frames_brood"
 
 "varroa_adults"
-"varroa_brood"
-"frames_bees"
-"frames_brood"
+```
 
+```
+## [1] "varroa_adults"
+```
+
+```r
+"varroa_brood"
+```
+
+```
+## [1] "varroa_brood"
+```
+
+```r
+"frames_bees"
+```
+
+```
+## [1] "frames_bees"
+```
+
+```r
+"frames_brood"
+```
+
+```
+## [1] "frames_brood"
 ```
 
 
-```{r}
+
+```r
 df <- rbind(emplot_phor, emplot_infest, emplot_bees, emplot_brood)
 
 df2 <- df %>% 
@@ -52,7 +93,8 @@ df2 <- df %>%
 
 
 
-```{r}
+
+```r
 # Round the estimate and confidence limits to 2 decimal places
 df2$yvar <- sprintf("%.2f", df2$yvar)
 df2$LCL <- sprintf("%.2f", df2$LCL)
@@ -94,7 +136,8 @@ df3<- df2 %>%
 ```
 
 
-```{r}
+
+```r
 df_tbl <- gt(df3)
 
 df_rtf <- df_tbl %>%

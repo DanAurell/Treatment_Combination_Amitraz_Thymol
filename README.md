@@ -4,7 +4,7 @@ Data and analysis code for an experiment on control of Varroa mites in honey bee
 
 ### DOI
 
-DOI: 10.5281/zenodo.10612431
+10.5281/zenodo.10612430
 
 
 ### Citation

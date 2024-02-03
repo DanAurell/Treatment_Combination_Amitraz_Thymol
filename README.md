@@ -1,10 +1,8 @@
 # Data and code from: Combined treatment with amitraz and thymol to manage *Varroa destructor* mites (Acari: Varroidae) in *Apis mellifera* honey bee colonies (Hymenoptera: Apidae).
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10612431.svg)](https://doi.org/10.5281/zenodo.10612431)
+
 Data and analysis code for an experiment on control of Varroa mites in honey bee colonies using a combination of treatments based on amitraz and thymol. Research by Dan Aurell, Clint Wall, Selina Bruckner, and Geoffrey R. Williams.
-
-### DOI
-
-10.5281/zenodo.10612430
 
 
 ### Citation

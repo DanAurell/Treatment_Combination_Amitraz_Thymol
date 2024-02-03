@@ -13,7 +13,7 @@
 
 <meta name="date" content="2023-05-22" />
 
-<title>3_colony_strength_2023-05-22</title>
+<title>2.1 Varroa Infestation</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -350,7 +350,7 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">3_colony_strength_2023-05-22</h1>
+<h1 class="title toc-ignore">2.1 Varroa Infestation</h1>
 <h4 class="author">Dan Aurell</h4>
 <h4 class="date">2023-05-22</h4>
 
@@ -389,777 +389,830 @@ library(DHARMa)</code></pre>
 # Any colonies that became queenless between day 0 and 42
 qless &lt;- c(&quot;D8&quot;, &quot;RC1&quot;, &quot;D21&quot;, &quot;D24&quot;, &quot;C6&quot;, &quot;BC15&quot;)</code></pre>
 <pre class="r"><code>datum &lt;- read.csv(&quot;../2 Analysis/data_prepped/datum_prepped.csv&quot;)</code></pre>
+<p>Check treatment group of the colonies that were removed</p>
+<pre class="r"><code>datum %&gt;% 
+  filter(days == 0, col_no %in% qless)</code></pre>
+<pre><code>##    X col_no          trt time_point   date days q_status q_event pattern notes
+## 1  9     D8       Apivar          1 18-Sep    0     QS-B             3.5      
+## 2 10    RC1       Apivar          1 19-Sep    0       QR             2.0      
+## 3 22    D21       Apivar          1 18-Sep    0       QR             3.5      
+## 4 26    D24 Apiguard_Api          1 18-Sep    0     QS-B             2.5      
+## 5 33     C6 Apiguard_Api          1 19-Sep    0       QR             2.0      
+## 6 34   BC15       Apivar          1 19-Sep    0       QR             3.0      
+##   est_bee_num_by_wt est_bee_num_by_wt_floor mites_recov_3_washes
+## 1             322.2                     322                   35
+## 2             428.1                     428                   97
+## 3             343.6                     343                    9
+## 4             324.1                     324                   56
+## 5             347.3                     347                   82
+## 6             303.9                     303                   50
+##   bees_without_mites     phor2 infest_200 dwv_num_sides_obs dwv_tf
+## 1                287 10.862818         22                 1      1
+## 2                331 22.658257         58                 1      1
+## 3                334  2.619325         11                 0      1
+## 4                268 17.278618         34                 0      1
+## 5                265 23.610711         42                 3      1
+## 6                253 16.452781         68                 1      1
+##   cdb_num_sides_obs     bees wk_cells dr_capbrd_cells_num
+## 1                 2 14198.49 20174.35              791.25
+## 2                 1  7543.94 14964.40                0.00
+## 3                 0 13365.00 22822.80              161.70
+## 4                 0  8383.50 18141.20              269.50
+## 5                 0  8687.25 16803.60              107.80
+## 6                 2 13000.50 18559.20              323.40
+##   phoretic_mites_num_estimate wk_cells_infested_estimate
+## 1                        1542                       2219
+## 2                        1709                       4339
+## 3                         350                       1255
+## 4                        1448                       3084
+## 5                        2051                       3528
+## 6                        2138                       6310
+##   dr_cells_infested_estimate mites_total_estimate cap_brd_indiv indiv_total
+## 1                        553                 4315       20965.6    35164.09
+## 2                         NA                 6048       14964.4    22508.34
+## 3                         NA                 1605       22984.5    36349.50
+## 4                         NA                 4532       18410.7    26794.20
+## 5                         NA                 5580       16911.4    25598.65
+## 6                         NA                 8448       18882.6    31883.10
+##   indiv_adult_pct indiv_capbrd_pct bees_frames wk_frames honey_frames
+## 1        40.37781         59.62219      5.8430    3.0165        2.925
+## 2        33.51620         66.48380      3.1045    2.2375        3.915
+## 3        36.76804         63.23196      5.5000    3.4125        3.675
+## 4        31.28849         68.71151      3.4500    2.7125        3.150
+## 5        33.93636         66.06364      3.5750    2.5125        4.025
+## 6        40.77552         59.22448      5.3500    2.7750        5.775
+##   pollen_frames fob_at_all fob_top_bip          col_hist pre_pattern pre_phor2
+## 1         0.065         NA          NA      Richland pkg         3.5 10.862818
+## 2         1.090         NA          NA Christian Control         2.0 22.658257
+## 3         0.215         NA          NA      Richland pkg         3.5  2.619325
+## 4         0.300         NA          NA      Richland pkg         2.5 17.278618
+## 5         0.340         NA          NA Christian Control         2.0 23.610711
+## 6         1.325         NA          NA Christian Control         3.0 16.452781
+##   pre_infest_200 pre_mites_tot pre_bees pre_bees_frames pre_wk_cells
+## 1             22          4315 14198.49          5.8430     20174.35
+## 2             58          6048  7543.94          3.1045     14964.40
+## 3             11          1605 13365.00          5.5000     22822.80
+## 4             34          4532  8383.50          3.4500     18141.20
+## 5             42          5580  8687.25          3.5750     16803.60
+## 6             68          8448 13000.50          5.3500     18559.20
+##   pre_wk_frames pre_honey_frames pre_pollen_frames
+## 1        3.0165            2.925             0.065
+## 2        2.2375            3.915             1.090
+## 3        3.4125            3.675             0.215
+## 4        2.7125            3.150             0.300
+## 5        2.5125            4.025             0.340
+## 6        2.7750            5.775             1.325</code></pre>
+<pre class="r"><code># 4 were in Apivar
+# 2 were in Combination</code></pre>
 <p>Data prep for phor, infest, bees modeling</p>
 <pre class="r"><code>tempdatum &lt;- datum %&gt;% 
   filter(days %in% c(0,21,42),
          !(col_no %in% qless)
-         ) %&gt;%
-  mutate(tot = wk_cells_infested_estimate + phoretic_mites_num_estimate,
-           perc_of_mitepop_wkbrd = 100*wk_cells_infested_estimate/tot
-           )</code></pre>
-</div>
-<div id="treatment-effects-on-colony-strength" class="section level1">
-<h1>Treatment Effects on Colony Strength</h1>
-<div id="adult-bee-population" class="section level2">
-<h2>Adult Bee Population</h2>
-<pre class="r"><code>tempdatum &lt;- datum %&gt;% 
-  filter(days %in% c(0,21,42),
-         !(col_no %in% qless)
-         ) %&gt;%
-  mutate(tot = wk_cells_infested_estimate + phoretic_mites_num_estimate,
-           perc_of_mitepop_wkbrd = 100*wk_cells_infested_estimate/tot
-           )
+         )
 
-# A priori model
-m.bee1 &lt;- lmer(bees_frames ~ 
-                 trt + 
-                 days + 
-                 trt:days + 
-                 pre_phor2 + 
-                 pre_phor2:days +
-                 (1 | col_no), data = tempdatum)
-summary(m.bee1)</code></pre>
-<pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
-## Formula: bees_frames ~ trt + days + trt:days + pre_phor2 + pre_phor2:days +  
-##     (1 | col_no)
+# Simple sample size calculation to respond to reviewer
+# These were manually entered into table generated in the Plotting folder
+
+# Relevant variables with same n: trt days mites_recov_3_washes bees
+
+tempdatum %&gt;% 
+  group_by(days, trt) %&gt;% 
+  summarize(n= n())</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;days&#39;. You can override using the
+## `.groups` argument.</code></pre>
+<pre><code>## # A tibble: 9 × 3
+## # Groups:   days [3]
+##   days  trt              n
+##   &lt;fct&gt; &lt;fct&gt;        &lt;int&gt;
+## 1 0     Apivar          12
+## 2 0     Apiguard_Api    14
+## 3 0     AEC             15
+## 4 21    Apivar          12
+## 5 21    Apiguard_Api    14
+## 6 21    AEC             15
+## 7 42    Apivar          10
+## 8 42    Apiguard_Api    12
+## 9 42    AEC             15</code></pre>
+<pre class="r"><code># Different n: infest_200
+tempdatum %&gt;% 
+  filter(!is.na(infest_200)) %&gt;% 
+  group_by(days, trt) %&gt;% 
+  summarize(n= n())</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;days&#39;. You can override using the
+## `.groups` argument.</code></pre>
+<pre><code>## # A tibble: 9 × 3
+## # Groups:   days [3]
+##   days  trt              n
+##   &lt;fct&gt; &lt;fct&gt;        &lt;int&gt;
+## 1 0     Apivar          12
+## 2 0     Apiguard_Api    14
+## 3 0     AEC             15
+## 4 21    Apivar          11
+## 5 21    Apiguard_Api    10
+## 6 21    AEC             11
+## 7 42    Apivar          10
+## 8 42    Apiguard_Api    12
+## 9 42    AEC             15</code></pre>
+<p>Quick descriptive stats</p>
+<pre class="r"><code>tempdatum %&gt;%
+ summarise(
+ mean = mean(est_bee_num_by_wt),
+ mini = min(est_bee_num_by_wt),
+ maxi = max(est_bee_num_by_wt),
+ variance = var(est_bee_num_by_wt),
+ sd = sqrt(variance)
+ )</code></pre>
+<pre><code>##       mean  mini  maxi variance       sd
+## 1 321.7311 251.4 412.5 1529.709 39.11149</code></pre>
+</div>
+<div id="treatment-effects-on-varroa-infestation" class="section level1">
+<h1>Treatment Effects on Varroa Infestation</h1>
+<div id="varroa-on-adult-bees" class="section level2">
+<h2>Varroa on adult bees</h2>
+<div id="poisson-vs.-negative-binomial" class="section level3">
+<h3>Poisson vs. Negative Binomial</h3>
+<p>Checking for overdispersion -</p>
+<pre class="r"><code>dispersionstats &lt;- datum %&gt;%
+    filter(days %in% c(0,21,42),
+         !(col_no %in% qless)) %&gt;% 
+ summarise(
+ means = mean(mites_recov_3_washes),
+ variances = var(mites_recov_3_washes),
+ ratio = variances/means)
+
+# Variance-to-mean ratio of 22.5; use negative binomial distribution instead of Poisson</code></pre>
+<p>Fit Poisson and negative binomial models</p>
+<pre class="r"><code>m.phor.pois1 &lt;- glmer(mites_recov_3_washes ~ 
+                     trt + 
+                     days + 
+                     trt:days + 
+                     (1 | col_no), 
+                   data = tempdatum, family = poisson)
+
+
+m.phor.nb1 &lt;- glmer.nb(mites_recov_3_washes ~ 
+                     trt + 
+                     days + 
+                     trt:days + 
+                     (1 | col_no), 
+                   data = tempdatum)
+
+summary(m.phor.pois1)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: poisson  ( log )
+## Formula: mites_recov_3_washes ~ trt + days + trt:days + (1 | col_no)
 ##    Data: tempdatum
 ## 
-## REML criterion at convergence: 390.7
+##      AIC      BIC   logLik deviance df.resid 
+##   1018.0   1045.8   -499.0    998.0      109 
 ## 
 ## Scaled residuals: 
-##      Min       1Q   Median       3Q      Max 
-## -1.56434 -0.52555 -0.08592  0.36719  3.15820 
+##     Min      1Q  Median      3Q     Max 
+## -3.8439 -1.2000 -0.4187  0.6870  6.2286 
 ## 
 ## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  col_no   (Intercept) 0.9537   0.9766  
-##  Residual             0.9127   0.9554  
+##  Groups Name        Variance Std.Dev.
+##  col_no (Intercept) 0.3278   0.5725  
 ## Number of obs: 119, groups:  col_no, 41
 ## 
 ## Fixed effects:
-##                        Estimate Std. Error t value
-## (Intercept)             5.04377    0.51252   9.841
-## trtApiguard_Api         0.42894    0.53748   0.798
-## trtAEC                  0.29198    0.52992   0.551
-## days21                  0.06438    0.50686   0.127
-## days42                 -0.30274    0.52726  -0.574
-## pre_phor2              -0.09976    0.03212  -3.106
-## trtApiguard_Api:days21 -0.93016    0.53154  -1.750
-## trtAEC:days21           0.79235    0.52407   1.512
-## trtApiguard_Api:days42 -0.39018    0.56342  -0.693
-## trtAEC:days42           1.08864    0.54540   1.996
-## days21:pre_phor2       -0.07746    0.03176  -2.439
-## days42:pre_phor2       -0.07663    0.03421  -2.240
+##                        Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)             3.34160    0.17492  19.104  &lt; 2e-16 ***
+## trtApiguard_Api        -0.04477    0.23809  -0.188  0.85083    
+## trtAEC                  0.10204    0.23358   0.437  0.66223    
+## days21                 -1.71342    0.12660 -13.534  &lt; 2e-16 ***
+## days42                 -1.10824    0.11412  -9.711  &lt; 2e-16 ***
+## trtApiguard_Api:days21 -0.57310    0.20201  -2.837  0.00455 ** 
+## trtAEC:days21          -1.78877    0.28262  -6.329 2.46e-10 ***
+## trtApiguard_Api:days42 -0.30487    0.16658  -1.830  0.06722 .  
+## trtAEC:days42           0.24513    0.13899   1.764  0.07779 .  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## Correlation of Fixed Effects:
-##             (Intr) trtA_A trtAEC days21 days42 pr_ph2 tA_A:2 tAEC:2 tA_A:4
-## trtApgrd_Ap -0.559                                                        
-## trtAEC      -0.538  0.547                                                 
-## days21      -0.494  0.277  0.266                                          
-## days42      -0.475  0.266  0.256  0.481                                   
-## pre_phor2   -0.639 -0.008 -0.055  0.316  0.304                            
-## trtApg_A:21  0.277 -0.494 -0.270 -0.559 -0.269  0.004                     
-## trtAEC:dy21  0.266 -0.270 -0.494 -0.538 -0.258  0.027  0.547              
-## trtApg_A:42  0.261 -0.466 -0.255 -0.264 -0.583  0.004  0.472  0.258       
-## trtAEC:dy42  0.255 -0.260 -0.475 -0.258 -0.538  0.026  0.263  0.480  0.561
-## dys21:pr_p2  0.316  0.004  0.027 -0.639 -0.307 -0.494 -0.008 -0.055 -0.004
-## dys42:pr_p2  0.293  0.004  0.025 -0.296 -0.615 -0.459 -0.004 -0.025  0.005
-##             tAEC:4 d21:_2
-## trtApgrd_Ap              
-## trtAEC                   
-## days21                   
-## days42                   
-## pre_phor2                
-## trtApg_A:21              
-## trtAEC:dy21              
-## trtApg_A:42              
-## trtAEC:dy42              
-## dys21:pr_p2 -0.026       
-## dys42:pr_p2 -0.101  0.464</code></pre>
-<pre class="r"><code>m.bee1.ML &lt;- lmer(bees_frames ~ 
-                 trt + 
-                 days + 
-                 trt:days + 
-                 pre_phor2 + 
-                 pre_phor2:days +
-                 (1 | col_no), data = tempdatum, REML = F)
-
-# Omitting the phor:days interaction
-m.bee0.ML &lt;- lmer(bees_frames ~ 
-                 trt + 
-                 days + 
-                 trt:days + 
-                 pre_phor2 + 
-                 # pre_phor2:days +
-                 (1 | col_no), data = tempdatum, REML = F)
-anova(m.bee0.ML, m.bee1.ML)</code></pre>
-<pre><code>## Data: tempdatum
-## Models:
-## m.bee0.ML: bees_frames ~ trt + days + trt:days + pre_phor2 + (1 | col_no)
-## m.bee1.ML: bees_frames ~ trt + days + trt:days + pre_phor2 + pre_phor2:days + (1 | col_no)
-##           npar    AIC    BIC  logLik deviance  Chisq Df Pr(&gt;Chisq)  
-## m.bee0.ML   12 403.16 436.51 -189.58   379.16                       
-## m.bee1.ML   14 399.22 438.13 -185.61   371.22 7.9362  2    0.01891 *
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code># Significant effect of mite level... high-mite colonies shrink during successive dates of trial
-
-# Omitting the phor:days interaction
-m.bee00.ML &lt;- lmer(bees_frames ~ 
-                 trt + 
-                 days + 
-                 trt:days + 
-                 # pre_phor2 + 
-                 # pre_phor2:days +
-                 (1 | col_no), data = tempdatum, REML = F)
-anova(m.bee00.ML, m.bee0.ML)</code></pre>
-<pre><code>## Data: tempdatum
-## Models:
-## m.bee00.ML: bees_frames ~ trt + days + trt:days + (1 | col_no)
-## m.bee0.ML: bees_frames ~ trt + days + trt:days + pre_phor2 + (1 | col_no)
-##            npar    AIC    BIC  logLik deviance  Chisq Df Pr(&gt;Chisq)    
-## m.bee00.ML   11 426.39 456.96 -202.20   404.39                         
-## m.bee0.ML    12 403.16 436.51 -189.58   379.16 25.231  1  5.085e-07 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code># Second reduced model omitting the trt:days interaction
-m.bee000.ML &lt;- lmer(bees_frames ~ 
-                 trt + 
-                 days + 
-                 # trt:days + 
-                 pre_phor2 + 
-                 pre_phor2:days +
-                 (1 | col_no), data = tempdatum, REML = F)
-anova(m.bee000.ML, m.bee1.ML)</code></pre>
-<pre><code>## Data: tempdatum
-## Models:
-## m.bee000.ML: bees_frames ~ trt + days + pre_phor2 + pre_phor2:days + (1 | col_no)
-## m.bee1.ML: bees_frames ~ trt + days + trt:days + pre_phor2 + pre_phor2:days + (1 | col_no)
-##             npar    AIC    BIC  logLik deviance  Chisq Df Pr(&gt;Chisq)   
-## m.bee000.ML   10 405.82 433.61 -192.91   385.82                        
-## m.bee1.ML     14 399.22 438.13 -185.61   371.22 14.594  4   0.005622 **
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code># Significant trt:days interaction
-
-# True a priori model
-m.bee.apriori.ML &lt;- lmer(bees_frames ~ 
-                 trt + 
-                 days + 
-                 trt:days +
-                 (1 | col_no), data = tempdatum, REML = F)
-
-m.bee.apriori0.ML &lt;- lmer(bees_frames ~ 
-                 trt + 
-                 days + 
-                 # trt:days +
-                 (1 | col_no), data = tempdatum, REML = F)
-
-anova(m.bee.apriori.ML, m.bee.apriori0.ML)</code></pre>
-<pre><code>## Data: tempdatum
-## Models:
-## m.bee.apriori0.ML: bees_frames ~ trt + days + (1 | col_no)
-## m.bee.apriori.ML: bees_frames ~ trt + days + trt:days + (1 | col_no)
-##                   npar    AIC    BIC  logLik deviance  Chisq Df Pr(&gt;Chisq)  
-## m.bee.apriori0.ML    7 430.49 449.94 -208.24   416.49                       
-## m.bee.apriori.ML    11 426.39 456.96 -202.20   404.39 12.097  4    0.01664 *
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code># Save REML version
-m.bee.apriori &lt;- lmer(bees_frames ~ 
-                 trt + 
-                 days + 
-                 trt:days +
-                 (1 | col_no), data = tempdatum, REML = F)</code></pre>
-</div>
-<div id="population-of-capped-worker-brood" class="section level2">
-<h2>Population of capped worker brood</h2>
-<pre class="r"><code>tempdatum &lt;- datum %&gt;% 
-  filter(days %in% c(0,10,21,42),
-         !(col_no %in% qless)
-         )</code></pre>
-<pre class="r"><code>m.brood1 &lt;- lmer(wk_frames ~ 
-                   trt + 
-                   days + 
-                   trt:days + 
-                   pre_phor2 +
-                   pre_phor2:days +
-                  (1 | col_no), 
-                 data = tempdatum)
-summary(m.brood1)</code></pre>
-<pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
-## Formula: wk_frames ~ trt + days + trt:days + pre_phor2 + pre_phor2:days +  
-##     (1 | col_no)
+##             (Intr) trtA_A trtAEC days21 days42 tA_A:2 tAEC:2 tA_A:4
+## trtApgrd_Ap -0.733                                                 
+## trtAEC      -0.748  0.549                                          
+## days21      -0.111  0.081  0.083                                   
+## days42      -0.134  0.098  0.100  0.169                            
+## trtApg_A:21  0.069 -0.098 -0.052 -0.627 -0.106                     
+## trtAEC:dy21  0.050 -0.036 -0.065 -0.448 -0.076  0.281              
+## trtApg_A:42  0.092 -0.129 -0.068 -0.116 -0.685  0.141  0.052       
+## trtAEC:dy42  0.110 -0.081 -0.140 -0.139 -0.821  0.087  0.110  0.562</code></pre>
+<pre class="r"><code>summary(m.phor.nb1)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: Negative Binomial(2.7646)  ( log )
+## Formula: mites_recov_3_washes ~ trt + days + trt:days + (1 | col_no)
 ##    Data: tempdatum
 ## 
-## REML criterion at convergence: 243.2
+##      AIC      BIC   logLik deviance df.resid 
+##    799.6    830.1   -388.8    777.6      108 
 ## 
 ## Scaled residuals: 
 ##     Min      1Q  Median      3Q     Max 
-## -3.2006 -0.4918 -0.0492  0.5207  2.6671 
+## -1.4665 -0.7074 -0.2575  0.3417  2.8541 
 ## 
 ## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  col_no   (Intercept) 0.0619   0.2488  
-##  Residual             0.1649   0.4061  
-## Number of obs: 160, groups:  col_no, 41
+##  Groups Name        Variance Std.Dev.
+##  col_no (Intercept) 0.1638   0.4047  
+## Number of obs: 119, groups:  col_no, 41
 ## 
 ## Fixed effects:
-##                        Estimate Std. Error t value
-## (Intercept)             2.69654    0.17867  15.093
-## trtApiguard_Api         0.26472    0.18737   1.413
-## trtAEC                  0.26208    0.18474   1.419
-## days10                 -1.14977    0.21545  -5.337
-## days21                 -1.06697    0.21545  -4.952
-## days42                 -1.92770    0.22310  -8.641
-## pre_phor2              -0.02736    0.01120  -2.444
-## trtApiguard_Api:days10 -0.66068    0.22595  -2.924
-## trtAEC:days10          -0.16539    0.22277  -0.742
-## trtApiguard_Api:days21 -0.16514    0.22595  -0.731
-## trtAEC:days21          -0.09063    0.22277  -0.407
-## trtApiguard_Api:days42 -0.32512    0.23790  -1.367
-## trtAEC:days42          -0.12991    0.23076  -0.563
-## days10:pre_phor2       -0.01290    0.01350  -0.956
-## days21:pre_phor2       -0.01080    0.01350  -0.800
-## days42:pre_phor2        0.02021    0.01442   1.401</code></pre>
-<pre><code>## 
-## Correlation matrix not shown by default, as p = 16 &gt; 12.
-## Use print(x, correlation=TRUE)  or
-##     vcov(x)        if you need it</code></pre>
-<pre class="r"><code>m.brood1.ML &lt;- lmer(wk_frames ~ 
-                   trt + 
-                   days + 
-                   trt:days + 
-                   pre_phor2 +
-                   pre_phor2:days +
-                  (1 | col_no), 
-                 data = tempdatum, REML = F)
-summary(m.brood1.ML)</code></pre>
-<pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
-## Formula: wk_frames ~ trt + days + trt:days + pre_phor2 + pre_phor2:days +  
+##                        Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)             3.41169    0.22189  15.376  &lt; 2e-16 ***
+## trtApiguard_Api        -0.05086    0.29904  -0.170    0.865    
+## trtAEC                  0.11490    0.29608   0.388    0.698    
+## days21                 -1.74295    0.28286  -6.162 7.19e-10 ***
+## days42                 -1.16471    0.29655  -3.928 8.58e-05 ***
+## trtApiguard_Api:days21 -0.58309    0.40131  -1.453    0.146    
+## trtAEC:days21          -1.81177    0.44515  -4.070 4.70e-05 ***
+## trtApiguard_Api:days42 -0.37893    0.40531  -0.935    0.350    
+## trtAEC:days42           0.20660    0.38718   0.534    0.594    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) trtA_A trtAEC days21 days42 tA_A:2 tAEC:2 tA_A:4
+## trtApgrd_Ap -0.735                                                 
+## trtAEC      -0.746  0.550                                          
+## days21      -0.542  0.403  0.407                                   
+## days42      -0.552  0.406  0.412  0.413                            
+## trtApg_A:21  0.388 -0.532 -0.290 -0.704 -0.294                     
+## trtAEC:dy21  0.352 -0.259 -0.478 -0.634 -0.266  0.449              
+## trtApg_A:42  0.410 -0.541 -0.305 -0.301 -0.734  0.399  0.196       
+## trtAEC:dy42  0.431 -0.314 -0.571 -0.315 -0.770  0.227  0.381  0.568</code></pre>
+<p>Comparing nb to poisson with deviance F-test</p>
+<pre class="r"><code># Test whether nb is a stat sig better fit than poisson:
+anova(m.phor.nb1, m.phor.pois1)</code></pre>
+<pre><code>## Data: tempdatum
+## Models:
+## m.phor.pois1: mites_recov_3_washes ~ trt + days + trt:days + (1 | col_no)
+## m.phor.nb1: mites_recov_3_washes ~ trt + days + trt:days + (1 | col_no)
+##              npar     AIC     BIC  logLik deviance  Chisq Df Pr(&gt;Chisq)    
+## m.phor.pois1   10 1018.01 1045.80 -499.01   998.01                         
+## m.phor.nb1     11  799.57  830.14 -388.79   777.57 220.44  1  &lt; 2.2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code># Yes, highly significantly better (p&lt;2.2e-16)
+
+summary(m.phor.pois1)$coefficients</code></pre>
+<pre><code>##                           Estimate Std. Error     z value     Pr(&gt;|z|)
+## (Intercept)             3.34160059  0.1749152  19.1041209 2.333239e-81
+## trtApiguard_Api        -0.04477365  0.2380867  -0.1880561 8.508327e-01
+## trtAEC                  0.10203626  0.2335818   0.4368330 6.622325e-01
+## days21                 -1.71341904  0.1266002 -13.5340903 9.839293e-42
+## days42                 -1.10823811  0.1141182  -9.7113166 2.698290e-22
+## trtApiguard_Api:days21 -0.57310014  0.2020060  -2.8370457 4.553309e-03
+## trtAEC:days21          -1.78876829  0.2826167  -6.3293084 2.462625e-10
+## trtApiguard_Api:days42 -0.30486559  0.1665766  -1.8301829 6.722259e-02
+## trtAEC:days42           0.24512837  0.1389866   1.7636837 7.778524e-02</code></pre>
+<pre class="r"><code>summary(m.phor.nb1)$coefficients</code></pre>
+<pre><code>##                           Estimate Std. Error    z value     Pr(&gt;|z|)
+## (Intercept)             3.41169097  0.2218874 15.3757780 2.379676e-53
+## trtApiguard_Api        -0.05086181  0.2990444 -0.1700811 8.649463e-01
+## trtAEC                  0.11490078  0.2960839  0.3880683 6.979655e-01
+## days21                 -1.74295276  0.2828625 -6.1618374 7.190566e-10
+## days42                 -1.16470523  0.2965474 -3.9275516 8.581500e-05
+## trtApiguard_Api:days21 -0.58309494  0.4013066 -1.4529913 1.462262e-01
+## trtAEC:days21          -1.81177476  0.4451547 -4.0699895 4.701526e-05
+## trtApiguard_Api:days42 -0.37892991  0.4053108 -0.9349119 3.498337e-01
+## trtAEC:days42           0.20659848  0.3871784  0.5336002 5.936181e-01</code></pre>
+<pre class="r"><code># The p values for my predictors went up, but the fit is way better
+  # This makes sense... Poisson is not conservative enough with overdispersed data
+# The parameter estimates stay pretty much the same. Good.</code></pre>
+</div>
+<div id="fit-model-that-uses-number-of-bees-in-sample-as-the-offset" class="section level3">
+<h3>Fit model that uses number of bees in sample as the offset</h3>
+<pre class="r"><code># A priori model
+m.phor.nb1 &lt;- glmer.nb(mites_recov_3_washes ~ 
+                     trt + 
+                     days + 
+                     trt:days + 
+                     (1 | col_no), 
+                   data = tempdatum)
+summary(m.phor.nb1)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: Negative Binomial(2.7646)  ( log )
+## Formula: mites_recov_3_washes ~ trt + days + trt:days + (1 | col_no)
+##    Data: tempdatum
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    799.6    830.1   -388.8    777.6      108 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -1.4665 -0.7074 -0.2575  0.3417  2.8541 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  col_no (Intercept) 0.1638   0.4047  
+## Number of obs: 119, groups:  col_no, 41
+## 
+## Fixed effects:
+##                        Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)             3.41169    0.22189  15.376  &lt; 2e-16 ***
+## trtApiguard_Api        -0.05086    0.29904  -0.170    0.865    
+## trtAEC                  0.11490    0.29608   0.388    0.698    
+## days21                 -1.74295    0.28286  -6.162 7.19e-10 ***
+## days42                 -1.16471    0.29655  -3.928 8.58e-05 ***
+## trtApiguard_Api:days21 -0.58309    0.40131  -1.453    0.146    
+## trtAEC:days21          -1.81177    0.44515  -4.070 4.70e-05 ***
+## trtApiguard_Api:days42 -0.37893    0.40531  -0.935    0.350    
+## trtAEC:days42           0.20660    0.38718   0.534    0.594    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) trtA_A trtAEC days21 days42 tA_A:2 tAEC:2 tA_A:4
+## trtApgrd_Ap -0.735                                                 
+## trtAEC      -0.746  0.550                                          
+## days21      -0.542  0.403  0.407                                   
+## days42      -0.552  0.406  0.412  0.413                            
+## trtApg_A:21  0.388 -0.532 -0.290 -0.704 -0.294                     
+## trtAEC:dy21  0.352 -0.259 -0.478 -0.634 -0.266  0.449              
+## trtApg_A:42  0.410 -0.541 -0.305 -0.301 -0.734  0.399  0.196       
+## trtAEC:dy42  0.431 -0.314 -0.571 -0.315 -0.770  0.227  0.381  0.568</code></pre>
+<pre class="r"><code># Take into account the number of bees per sample
+
+m.phor &lt;- glmer.nb(mites_recov_3_washes ~ 
+                     trt + 
+                     days + 
+                     trt:days + 
+                     offset(log(est_bee_num_by_wt_floor)) +
+                     (1 | col_no),
+                   data = tempdatum)
+summary(m.phor) </code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: Negative Binomial(2.9619)  ( log )
+## Formula: 
+## mites_recov_3_washes ~ trt + days + trt:days + offset(log(est_bee_num_by_wt_floor)) +  
 ##     (1 | col_no)
 ##    Data: tempdatum
 ## 
 ##      AIC      BIC   logLik deviance df.resid 
-##    221.8    277.1    -92.9    185.8      142 
+##    797.5    828.1   -387.8    775.5      108 
 ## 
 ## Scaled residuals: 
 ##     Min      1Q  Median      3Q     Max 
-## -3.3738 -0.5179 -0.0525  0.5495  2.8113 
+## -1.5292 -0.7174 -0.2435  0.3572  2.7668 
 ## 
 ## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  col_no   (Intercept) 0.05588  0.2364  
-##  Residual             0.14835  0.3852  
-## Number of obs: 160, groups:  col_no, 41
+##  Groups Name        Variance Std.Dev.
+##  col_no (Intercept) 0.1987   0.4457  
+## Number of obs: 119, groups:  col_no, 41
 ## 
 ## Fixed effects:
-##                        Estimate Std. Error t value
-## (Intercept)             2.69654    0.16953  15.906
-## trtApiguard_Api         0.26472    0.17779   1.489
-## trtAEC                  0.26208    0.17529   1.495
-## days10                 -1.14977    0.20434  -5.627
-## days21                 -1.06697    0.20434  -5.221
-## days42                 -1.92777    0.21159  -9.111
-## pre_phor2              -0.02736    0.01062  -2.575
-## trtApiguard_Api:days10 -0.66068    0.21429  -3.083
-## trtAEC:days10          -0.16539    0.21128  -0.783
-## trtApiguard_Api:days21 -0.16514    0.21429  -0.771
-## trtAEC:days21          -0.09063    0.21128  -0.429
-## trtApiguard_Api:days42 -0.32511    0.22564  -1.441
-## trtAEC:days42          -0.12984    0.21886  -0.593
-## days10:pre_phor2       -0.01290    0.01281  -1.008
-## days21:pre_phor2       -0.01080    0.01281  -0.844
-## days42:pre_phor2        0.02021    0.01368   1.478</code></pre>
-<pre><code>## 
-## Correlation matrix not shown by default, as p = 16 &gt; 12.
-## Use print(x, correlation=TRUE)  or
-##     vcov(x)        if you need it</code></pre>
-<pre class="r"><code># Omit pre_phor2:days effect
-m.brood01.ML &lt;- lmer(wk_frames ~ 
-                   trt + 
-                   days + 
-                   trt:days + 
-                   pre_phor2 +
-                   # pre_phor2:days +
-                  (1 | col_no), 
-                 data = tempdatum, REML = F)
-summary(m.brood01.ML)</code></pre>
-<pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
-## Formula: wk_frames ~ trt + days + trt:days + pre_phor2 + (1 | col_no)
-##    Data: tempdatum
-## 
-##      AIC      BIC   logLik deviance df.resid 
-##    222.7    268.8    -96.4    192.7      145 
-## 
-## Scaled residuals: 
-##     Min      1Q  Median      3Q     Max 
-## -3.3042 -0.5974  0.0052  0.5653  2.7159 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  col_no   (Intercept) 0.05371  0.2318  
-##  Residual             0.15719  0.3965  
-## Number of obs: 160, groups:  col_no, 41
-## 
-## Fixed effects:
-##                         Estimate Std. Error t value
-## (Intercept)             2.717876   0.151805  17.904
-## trtApiguard_Api         0.265014   0.180670   1.467
-## trtAEC                  0.263981   0.177987   1.483
-## days10                 -1.281250   0.161861  -7.916
-## days21                 -1.177083   0.161861  -7.272
-## days42                 -1.744905   0.171095 -10.198
-## pre_phor2              -0.029454   0.007257  -4.059
-## trtApiguard_Api:days10 -0.662500   0.220579  -3.003
-## trtAEC:days10          -0.177083   0.217159  -0.815
-## trtApiguard_Api:days21 -0.166667   0.220579  -0.756
-## trtAEC:days21          -0.100417   0.217159  -0.462
-## trtApiguard_Api:days42 -0.330591   0.232176  -1.424
-## trtAEC:days42          -0.088428   0.224127  -0.395</code></pre>
-<pre><code>## 
-## Correlation matrix not shown by default, as p = 13 &gt; 12.
-## Use print(x, correlation=TRUE)  or
-##     vcov(x)        if you need it</code></pre>
-<pre class="r"><code>anova(m.brood01.ML, m.brood1.ML) # Simpler model preferred, but just barely (p=0.07395)</code></pre>
-<pre><code>## Data: tempdatum
-## Models:
-## m.brood01.ML: wk_frames ~ trt + days + trt:days + pre_phor2 + (1 | col_no)
-## m.brood1.ML: wk_frames ~ trt + days + trt:days + pre_phor2 + pre_phor2:days + (1 | col_no)
-##              npar    AIC    BIC  logLik deviance  Chisq Df Pr(&gt;Chisq)  
-## m.brood01.ML   15 222.72 268.84 -96.358   192.72                       
-## m.brood1.ML    18 221.78 277.13 -92.890   185.78 6.9364  3    0.07395 .
+##                        Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)             -2.4096     0.2233 -10.790  &lt; 2e-16 ***
+## trtApiguard_Api          0.0136     0.3018   0.045   0.9641    
+## trtAEC                   0.1598     0.2985   0.535   0.5925    
+## days21                  -1.6345     0.2763  -5.915 3.31e-09 ***
+## days42                  -1.1651     0.2894  -4.025 5.69e-05 ***
+## trtApiguard_Api:days21  -0.6738     0.3929  -1.715   0.0863 .  
+## trtAEC:days21           -1.9050     0.4380  -4.349 1.37e-05 ***
+## trtApiguard_Api:days42  -0.4265     0.3954  -1.079   0.2807    
+## trtAEC:days42            0.1442     0.3770   0.382   0.7021    
 ## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code># Full model minus the trt:days interaction
-m.brood02.ML &lt;- lmer(wk_frames ~ 
-                   trt + 
-                   days + 
-                   # trt:days + 
-                   pre_phor2 +
-                   pre_phor2:days +
-                  (1 | col_no), 
-                 data = tempdatum, REML = F)
-summary(m.brood02.ML)</code></pre>
-<pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
-## Formula: wk_frames ~ trt + days + pre_phor2 + pre_phor2:days + (1 | col_no)
-##    Data: tempdatum
-## 
-##      AIC      BIC   logLik deviance df.resid 
-##    221.2    258.1    -98.6    197.2      148 
-## 
-## Scaled residuals: 
-##      Min       1Q   Median       3Q      Max 
-## -2.87487 -0.57730  0.02543  0.50380  3.09546 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  col_no   (Intercept) 0.05174  0.2275  
-##  Residual             0.16340  0.4042  
-## Number of obs: 160, groups:  col_no, 41
-## 
-## Fixed effects:
-##                  Estimate Std. Error t value
-## (Intercept)       2.83051    0.15381  18.403
-## trtApiguard_Api  -0.02144    0.12093  -0.177
-## trtAEC            0.16617    0.11886   1.398
-## days10           -1.44112    0.16756  -8.601
-## days21           -1.15556    0.16756  -6.896
-## days42           -2.08492    0.17142 -12.163
-## pre_phor2        -0.02747    0.01089  -2.522
-## days10:pre_phor2 -0.01241    0.01341  -0.925
-## days21:pre_phor2 -0.01090    0.01341  -0.812
-## days42:pre_phor2  0.02016    0.01423   1.416
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## Correlation of Fixed Effects:
-##             (Intr) trtA_A trtAEC days10 days21 days42 pr_ph2 d10:_2 d21:_2
-## trtApgrd_Ap -0.419                                                        
-## trtAEC      -0.403  0.549                                                 
-## days10      -0.545  0.000  0.000                                          
-## days21      -0.545  0.000  0.000  0.500                                   
-## days42      -0.532 -0.006  0.005  0.489  0.489                            
-## pre_phor2   -0.737 -0.006 -0.036  0.521  0.521  0.509                     
-## dys10:pr_p2  0.461  0.000  0.000 -0.846 -0.423 -0.414 -0.616              
-## dys21:pr_p2  0.461  0.000  0.000 -0.423 -0.846 -0.414 -0.616  0.500       
-## dys42:pr_p2  0.438  0.005 -0.020 -0.399 -0.399 -0.843 -0.579  0.471  0.471</code></pre>
-<pre class="r"><code>anova(m.brood02.ML, m.brood1.ML)</code></pre>
-<pre><code>## Data: tempdatum
-## Models:
-## m.brood02.ML: wk_frames ~ trt + days + pre_phor2 + pre_phor2:days + (1 | col_no)
-## m.brood1.ML: wk_frames ~ trt + days + trt:days + pre_phor2 + pre_phor2:days + (1 | col_no)
-##              npar    AIC    BIC  logLik deviance  Chisq Df Pr(&gt;Chisq)  
-## m.brood02.ML   12 221.16 258.06 -98.579   197.16                       
-## m.brood1.ML    18 221.78 277.13 -92.890   185.78 11.378  6    0.07737 .
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code># Weak evidence for a brood:days interaction (p=0.07737) in the presence of the pre_phor stuff
-
-# Omit trt:days in the context of pre_phor 2 main effect
-m.brood04.ML &lt;- lmer(wk_frames ~ 
-                   trt + 
-                   days + 
-                   # trt:days + 
-                   pre_phor2 +
-                   # pre_phor2:days +
-                  (1 | col_no), 
-                 data = tempdatum, REML = F)
-anova(m.brood04.ML, m.brood01.ML)</code></pre>
-<pre><code>## Data: tempdatum
-## Models:
-## m.brood04.ML: wk_frames ~ trt + days + pre_phor2 + (1 | col_no)
-## m.brood01.ML: wk_frames ~ trt + days + trt:days + pre_phor2 + (1 | col_no)
-##              npar    AIC    BIC   logLik deviance  Chisq Df Pr(&gt;Chisq)  
-## m.brood04.ML    9 221.47 249.15 -101.736   203.47                       
-## m.brood01.ML   15 222.72 268.84  -96.358   192.72 10.757  6     0.0962 .
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code># Again, trt:days effect not quite significant (p=0.0962)
+##             (Intr) trtA_A trtAEC days21 days42 tA_A:2 tAEC:2 tA_A:4
+## trtApgrd_Ap -0.734                                                 
+## trtAEC      -0.746  0.548                                          
+## days21      -0.520  0.386  0.389                                   
+## days42      -0.529  0.388  0.395  0.410                            
+## trtApg_A:21  0.369 -0.507 -0.276 -0.703 -0.290                     
+## trtAEC:dy21  0.333 -0.245 -0.454 -0.629 -0.261  0.444              
+## trtApg_A:42  0.389 -0.517 -0.290 -0.300 -0.733  0.394  0.192       
+## trtAEC:dy42  0.412 -0.299 -0.548 -0.314 -0.770  0.223  0.376  0.566</code></pre>
+<pre class="r"><code># I need to provide a value of the offset when making predictions from the model
 
 
-# Omit pre_phor2
-m.brood05.ML &lt;- lmer(wk_frames ~ 
-                   trt + 
-                   days + 
-                   trt:days + 
-                   # pre_phor2 +
-                   # pre_phor2:days +
-                  (1 | col_no), 
-                 data = tempdatum, REML = F)
-anova(m.brood05.ML, m.brood01.ML)</code></pre>
-<pre><code>## Data: tempdatum
-## Models:
-## m.brood05.ML: wk_frames ~ trt + days + trt:days + (1 | col_no)
-## m.brood01.ML: wk_frames ~ trt + days + trt:days + pre_phor2 + (1 | col_no)
-##              npar    AIC    BIC   logLik deviance  Chisq Df Pr(&gt;Chisq)    
-## m.brood05.ML   14 234.55 277.60 -103.273   206.55                         
-## m.brood01.ML   15 222.72 268.84  -96.358   192.72 13.831  1      2e-04 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code># Omit trt:days in the context of pre_phor 2 main effect
-m.brood06.ML &lt;- lmer(wk_frames ~ 
-                   trt + 
-                   # days + 
-                   # trt:days + 
-                   pre_phor2 +
-                   # pre_phor2:days +
-                  (1 | col_no), 
-                 data = tempdatum, REML = F)</code></pre>
-<pre><code>## boundary (singular) fit: see help(&#39;isSingular&#39;)</code></pre>
-<pre class="r"><code>anova(m.brood06.ML, m.brood04.ML)</code></pre>
-<pre><code>## Data: tempdatum
-## Models:
-## m.brood06.ML: wk_frames ~ trt + pre_phor2 + (1 | col_no)
-## m.brood04.ML: wk_frames ~ trt + days + pre_phor2 + (1 | col_no)
-##              npar    AIC    BIC  logLik deviance  Chisq Df Pr(&gt;Chisq)    
-## m.brood06.ML    6 415.06 433.51 -201.53   403.06                         
-## m.brood04.ML    9 221.47 249.15 -101.74   203.47 199.58  3  &lt; 2.2e-16 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code># Again, days effect significant (p&lt;0.0001)
+# Test significance of trt:days interaction
 
-# Preferred model: m.brood01.ML
-# Make REML version
-m.brood01 &lt;- lmer(wk_frames ~ 
-                   trt + 
-                   days + 
-                   trt:days + 
-                   pre_phor2 +
-                   # pre_phor2:days +
-                  (1 | col_no), 
-                 data = tempdatum)
+## Fit model that omits trt:days interaction
 
-summary(m.brood01)</code></pre>
-<pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
-## Formula: wk_frames ~ trt + days + trt:days + pre_phor2 + (1 | col_no)
+m.phor.0 &lt;- glmer.nb(mites_recov_3_washes ~ 
+                     trt + 
+                     days + 
+                     # trt:days + 
+                     offset(log(est_bee_num_by_wt_floor)) +
+                     (1 | col_no),
+                   data = tempdatum)
+summary(m.phor.0)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: Negative Binomial(2.08)  ( log )
+## Formula: 
+## mites_recov_3_washes ~ trt + days + offset(log(est_bee_num_by_wt_floor)) +  
+##     (1 | col_no)
 ##    Data: tempdatum
 ## 
-## REML criterion at convergence: 228.7
+##      AIC      BIC   logLik deviance df.resid 
+##    816.2    835.7   -401.1    802.2      112 
 ## 
 ## Scaled residuals: 
 ##     Min      1Q  Median      3Q     Max 
-## -3.1676 -0.5653  0.0034  0.5358  2.6019 
+## -1.3430 -0.6425 -0.2723  0.3576  3.8385 
 ## 
 ## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  col_no   (Intercept) 0.06082  0.2466  
-##  Residual             0.16994  0.4122  
-## Number of obs: 160, groups:  col_no, 41
+##  Groups Name        Variance Std.Dev.
+##  col_no (Intercept) 0.1488   0.3858  
+## Number of obs: 119, groups:  col_no, 41
 ## 
 ## Fixed effects:
-##                         Estimate Std. Error t value
-## (Intercept)             2.717914   0.159063  17.087
-## trtApiguard_Api         0.265014   0.188982   1.402
-## trtAEC                  0.263985   0.186177   1.418
-## days10                 -1.281250   0.168296  -7.613
-## days21                 -1.177083   0.168296  -6.994
-## days42                 -1.745861   0.177927  -9.812
-## pre_phor2              -0.029457   0.007645  -3.853
-## trtApiguard_Api:days10 -0.662500   0.229349  -2.889
-## trtAEC:days10          -0.177083   0.225793  -0.784
-## trtApiguard_Api:days21 -0.166667   0.229349  -0.727
-## trtAEC:days21          -0.100417   0.225793  -0.445
-## trtApiguard_Api:days42 -0.330381   0.241445  -1.368
-## trtAEC:days42          -0.087472   0.233060  -0.375</code></pre>
-<pre><code>## 
-## Correlation matrix not shown by default, as p = 13 &gt; 12.
-## Use print(x, correlation=TRUE)  or
-##     vcov(x)        if you need it</code></pre>
-<pre class="r"><code>confint(m.brood01)</code></pre>
-<pre><code>## Computing profile confidence intervals ...</code></pre>
-<pre><code>##                              2.5 %      97.5 %
-## .sig01                  0.13746579  0.33467855
-## .sigma                  0.35064552  0.45330423
-## (Intercept)             2.41753275  3.01834805
-## trtApiguard_Api        -0.09168296  0.62171182
-## trtAEC                 -0.08741977  0.61538939
-## days10                 -1.60111491 -0.96138509
-## days21                 -1.49694825 -0.85721842
-## days42                 -2.08227708 -1.40511331
-## pre_phor2              -0.04403989 -0.01489445
-## trtApiguard_Api:days10 -1.09840240 -0.22659760
-## trtAEC:days10          -0.60622715  0.25206048
-## trtApiguard_Api:days21 -0.60256907  0.26923573
-## trtAEC:days21          -0.52956048  0.32872715
-## trtApiguard_Api:days42 -0.78959833  0.12788761
-## trtAEC:days42          -0.53293242  0.35360762</code></pre>
+##                 Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)      -2.1127     0.2058 -10.264  &lt; 2e-16 ***
+## trtApiguard_Api  -0.3495     0.2430  -1.438    0.150    
+## trtAEC           -0.2296     0.2382  -0.964    0.335    
+## days21           -2.3782     0.1876 -12.680  &lt; 2e-16 ***
+## days42           -1.2008     0.1754  -6.848  7.5e-12 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) trtA_A trtAEC days21
+## trtApgrd_Ap -0.672                     
+## trtAEC      -0.687  0.555              
+## days21      -0.434  0.091  0.141       
+## days42      -0.362  0.046 -0.043  0.405</code></pre>
+<pre class="r"><code>anova(m.phor, m.phor.0) </code></pre>
+<pre><code>## Data: tempdatum
+## Models:
+## m.phor.0: mites_recov_3_washes ~ trt + days + offset(log(est_bee_num_by_wt_floor)) + (1 | col_no)
+## m.phor: mites_recov_3_washes ~ trt + days + trt:days + offset(log(est_bee_num_by_wt_floor)) + (1 | col_no)
+##          npar    AIC    BIC  logLik deviance  Chisq Df Pr(&gt;Chisq)    
+## m.phor.0    7 816.25 835.70 -401.12   802.25                         
+## m.phor     11 797.51 828.08 -387.76   775.51 26.733  4  2.251e-05 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code># There was a significant interaction between day and treatment (p=2.251e-05) when tested by ANOVA. Therefore we analyzed each date separately.
+
+# Final model is m.phor &quot;.f&quot; means &quot;final&quot;
+m.phor.f &lt;- m.phor</code></pre>
+</div>
+<div id="joint-tests-of-phor-within-day-like-anova-of-phor-within-day" class="section level3">
+<h3>Joint tests of phor within day (Like ANOVA of phor within day)</h3>
+<p>Added step based on reviewer comment</p>
+<pre class="r"><code>#joint_tests(m.phor, by = &quot;days&quot;) 
+# Duplicate row names not allowed error
+
+#joint_tests(m.phor, offset = log(100))
+# Error in .find.by.rows(args, by) : &#39;by&#39; variables are not all in the grid
+
+#joint_tests(m.phor, offset = log(100), by = &quot;days&quot;)
+# Error in .find.by.rows(args, by) : &#39;by&#39; variables are not all in the grid
+
+# Used the joint_tests documentation to recreate the individual steps of what joint_tests does, adding in the offset at the appropriate step: https://cran.r-hub.io/web/packages/emmeans/emmeans.pdf
+
+emm.phor.f &lt;- emmeans(m.phor.f, pairwise ~ trt | days)
+con.phor.f &lt;- contrast(emm.phor.f, offset = log(100))
+test(con.phor.f, joint = TRUE, by = &quot;days&quot;)</code></pre>
+<pre><code>##  days df1 df2 F.ratio p.value note
+##  0      2 Inf   0.187  0.8291  d  
+##  21     2 Inf   9.388  0.0001  d  
+##  42     2 Inf   2.542  0.0787  d  
+## 
+## d: df1 reduced due to linear dependence</code></pre>
+<pre class="r"><code># On day 0, no significant differences between treatments (F ratio 2,Inf = 0.187, P=0.8291)
+# On day 21, significant differences between treatments (F ratio 2,Inf = 9.388, P=0.0001)
+# On day 42, no significant differences between treatments (F ratio 2,Inf = 2.542, P=0.0787)</code></pre>
 </div>
 </div>
-<div id="tidy-the-output-of-models" class="section level1">
-<h1>Tidy the output of models</h1>
-<p>To be able to report predicted response</p>
-<pre class="r"><code># Bees
+<div id="infestation-of-brood" class="section level2">
+<h2>Infestation of Brood</h2>
+<p>Checking for overdispersion</p>
+<pre class="r"><code>dispersionstats2 &lt;- datum %&gt;%
+    filter(days %in% c(0,21,42),
+         !(col_no %in% qless)) %&gt;% 
+ summarise(
+ means = mean(infest_200, na.rm = T),
+ variances = var(infest_200, na.rm = T),
+ ratio = variances/means)
 
-emres_bees&lt;- emmeans(m.bee1, pairwise ~ trt | days, type = &quot;response&quot;)$emmeans %&gt;% 
-  tidy()
+# Variance-to-mean ratio of 14.2; use negative binomial distribution instead of Poisson</code></pre>
+<pre class="r"><code># a priori model
+m.infest.nb1 &lt;- glmer.nb(infest_200 ~ 
+                     trt + 
+                     days + 
+                     trt:days + 
+                     (1 | col_no),
+                   data = tempdatum)
+summary(m.infest.nb1)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: Negative Binomial(2.927)  ( log )
+## Formula: infest_200 ~ trt + days + trt:days + (1 | col_no)
+##    Data: tempdatum
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    889.9    919.6   -434.0    867.9       99 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -1.4549 -0.6620 -0.2522  0.5550  3.3728 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  col_no (Intercept) 0.08164  0.2857  
+## Number of obs: 110, groups:  col_no, 41
+## 
+## Fixed effects:
+##                         Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)             3.396525   0.199688  17.009  &lt; 2e-16 ***
+## trtApiguard_Api        -0.017077   0.270644  -0.063  0.94969    
+## trtAEC                  0.006119   0.265756   0.023  0.98163    
+## days21                  0.164440   0.259312   0.634  0.52599    
+## days42                 -0.877069   0.278991  -3.144  0.00167 ** 
+## trtApiguard_Api:days21 -0.761186   0.373188  -2.040  0.04138 *  
+## trtAEC:days21          -0.928417   0.366209  -2.535  0.01124 *  
+## trtApiguard_Api:days42  0.256060   0.377665   0.678  0.49777    
+## trtAEC:days42           0.009770   0.364129   0.027  0.97859    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) trtA_A trtAEC days21 days42 tA_A:2 tAEC:2 tA_A:4
+## trtApgrd_Ap -0.727                                                 
+## trtAEC      -0.746  0.548                                          
+## days21      -0.627  0.465  0.472                                   
+## days42      -0.580  0.435  0.439  0.454                            
+## trtApg_A:21  0.443 -0.599 -0.330 -0.693 -0.311                     
+## trtAEC:dy21  0.447 -0.328 -0.603 -0.707 -0.319  0.493              
+## trtApg_A:42  0.427 -0.601 -0.324 -0.336 -0.739  0.437  0.236       
+## trtAEC:dy42  0.444 -0.334 -0.604 -0.348 -0.767  0.238  0.442  0.567</code></pre>
+<pre class="r"><code>m.infest.nb0 &lt;- glmer.nb(infest_200 ~ 
+                     trt + 
+                     days + 
+                     # trt:days + 
+                     (1 | col_no),
+                   data = tempdatum)
 
-emmeans(m.bee1, pairwise ~ trt | days, type = &quot;response&quot;)$contrasts</code></pre>
+anova(m.infest.nb1, m.infest.nb0)</code></pre>
+<pre><code>## Data: tempdatum
+## Models:
+## m.infest.nb0: infest_200 ~ trt + days + (1 | col_no)
+## m.infest.nb1: infest_200 ~ trt + days + trt:days + (1 | col_no)
+##              npar    AIC    BIC  logLik deviance  Chisq Df Pr(&gt;Chisq)  
+## m.infest.nb0    7 891.66 910.57 -438.83   877.66                       
+## m.infest.nb1   11 889.92 919.62 -433.96   867.92 9.7447  4    0.04496 *
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code># We found a significant interaction of treatment × experiment day on infestation rate of capped
+# worker brood (ChiSq 4=9.74, P=0.045)
+
+
+# Final model
+m.infest.f &lt;- m.infest.nb1</code></pre>
+<div id="joint-tests-of-infest-within-day-like-anova-of-infest-within-day" class="section level3">
+<h3>Joint tests of infest within day (Like ANOVA of infest within
+day)</h3>
+<p>Added step based on reviewer comment</p>
+<pre class="r"><code>joint_tests(m.infest.f) # Does not give a duplicate row names error</code></pre>
+<pre><code>##  model term df1 df2 F.ratio p.value
+##  trt          2 Inf   1.287  0.2761
+##  days         2 Inf  14.257  &lt;.0001
+##  trt:days     4 Inf   2.648  0.0316</code></pre>
+<pre class="r"><code>joint_tests(m.infest.f, by = &quot;days&quot;) </code></pre>
 <pre><code>## days = 0:
-##  contrast              estimate    SE   df t.ratio p.value
-##  Apivar - Apiguard_Api  -0.4289 0.537 71.4  -0.798  0.7054
-##  Apivar - AEC           -0.2920 0.530 71.4  -0.551  0.8463
-##  Apiguard_Api - AEC      0.1370 0.508 71.4   0.269  0.9608
+##  model term df1 df2 F.ratio p.value
+##  trt          2 Inf   0.004  0.9957
 ## 
 ## days = 21:
-##  contrast              estimate    SE   df t.ratio p.value
-##  Apivar - Apiguard_Api   0.5012 0.537 71.4   0.933  0.6216
-##  Apivar - AEC           -1.0843 0.530 71.4  -2.046  0.1087
-##  Apiguard_Api - AEC     -1.5856 0.508 71.4  -3.119  0.0073
+##  model term df1 df2 F.ratio p.value
+##  trt          2 Inf   5.678  0.0034
 ## 
 ## days = 42:
-##  contrast              estimate    SE   df t.ratio p.value
-##  Apivar - Apiguard_Api  -0.0388 0.570 80.3  -0.068  0.9974
-##  Apivar - AEC           -1.3806 0.551 77.6  -2.504  0.0378
-##  Apiguard_Api - AEC     -1.3419 0.526 76.7  -2.553  0.0336
+##  model term df1 df2 F.ratio p.value
+##  trt          2 Inf   0.427  0.6525</code></pre>
+<pre class="r"><code># Testing that this method (used for phor) gives same result
+emm.infest.f &lt;- emmeans(m.infest.f, pairwise ~ trt | days)
+con.infest.f &lt;- contrast(emm.infest.f, offset = log(100))
+test(con.infest.f, joint = TRUE, by = &quot;days&quot;)</code></pre>
+<pre><code>##  days df1 df2 F.ratio p.value note
+##  0      2 Inf   0.004  0.9957  d  
+##  21     2 Inf   5.678  0.0034  d  
+##  42     2 Inf   0.427  0.6525  d  
 ## 
-## Degrees-of-freedom method: kenward-roger 
-## P value adjustment: tukey method for comparing a family of 3 estimates</code></pre>
-<pre class="r"><code>confint(emmeans(m.bee1, pairwise ~ trt | days, type = &quot;response&quot;))$contrasts</code></pre>
-<pre><code>## days = 0:
-##  contrast              estimate    SE   df lower.CL upper.CL
-##  Apivar - Apiguard_Api  -0.4289 0.537 71.4   -1.715   0.8575
-##  Apivar - AEC           -0.2920 0.530 71.4   -1.560   0.9764
-##  Apiguard_Api - AEC      0.1370 0.508 71.4   -1.080   1.3536
-## 
-## days = 21:
-##  contrast              estimate    SE   df lower.CL upper.CL
-##  Apivar - Apiguard_Api   0.5012 0.537 71.4   -0.785   1.7877
-##  Apivar - AEC           -1.0843 0.530 71.4   -2.353   0.1841
-##  Apiguard_Api - AEC     -1.5856 0.508 71.4   -2.802  -0.3689
-## 
-## days = 42:
-##  contrast              estimate    SE   df lower.CL upper.CL
-##  Apivar - Apiguard_Api  -0.0388 0.570 80.3   -1.399   1.3212
-##  Apivar - AEC           -1.3806 0.551 77.6   -2.698  -0.0631
-##  Apiguard_Api - AEC     -1.3419 0.526 76.7   -2.598  -0.0854
-## 
-## Degrees-of-freedom method: kenward-roger 
-## Confidence level used: 0.95 
-## Conf-level adjustment: tukey method for comparing a family of 3 estimates</code></pre>
-<pre class="r"><code>## Day 42 frames of bees estimates
-### AEC 4.292991
-### Apivar 2.912365
-### Combination 2.951125
+## d: df1 reduced due to linear dependence</code></pre>
+<pre class="r"><code># Yes, exactly the same output. This confirms the workflow used above for phor
 
-## What percentage of bees were lacking in Apivar?
-100*(4.292991-2.912365)/4.292991 #32%</code></pre>
-<pre><code>## [1] 32.16</code></pre>
-<pre class="r"><code># 1.38 missing frames of bees. Convert to number of bees
-# Beebook reference
-2430*1.38 # 3353</code></pre>
-<pre><code>## [1] 3353.4</code></pre>
-<pre class="r"><code>## What percentage of bees were lacking in Combination?
-100*(4.292991-2.951125)/4.292991 # 31%</code></pre>
-<pre><code>## [1] 31.25714</code></pre>
-<pre class="r"><code>## Combination missing 1.34 frames of bees. Convert to number of bees
-## Beebook conversion
-2430*1.34 # 3256 bees missing</code></pre>
-<pre><code>## [1] 3256.2</code></pre>
-<pre class="r"><code>## Combination missing how many frames of brood on Day 10?
-1.2-0.73 # 0.47 frames of brood</code></pre>
-<pre><code>## [1] 0.47</code></pre>
-<pre class="r"><code>880*3.8*2 # 6688 cells of worker brood per frame</code></pre>
-<pre><code>## [1] 6688</code></pre>
-<pre class="r"><code>## Combination missing 0.47 frames of brood on Day 10. Convert to number of bees
-6688*0.47 #3143 brood missing</code></pre>
-<pre><code>## [1] 3143.36</code></pre>
-<pre class="r"><code>## Over time
-emmeans(m.bee1, pairwise ~ days | trt, type = &quot;response&quot;)$contrasts</code></pre>
-<pre><code>## trt = Apivar:
-##  contrast        estimate    SE   df t.ratio p.value
-##  days0 - days21   0.73862 0.390 70.0   1.894  0.1481
-##  days0 - days42   1.09718 0.417 71.9   2.630  0.0278
-##  days21 - days42  0.35856 0.417 71.9   0.860  0.6673
-## 
-## trt = Apiguard_Api:
-##  contrast        estimate    SE   df t.ratio p.value
-##  days0 - days21   1.66878 0.361 70.0   4.621  &lt;.0001
-##  days0 - days42   1.48736 0.383 71.7   3.884  0.0007
-##  days21 - days42 -0.18142 0.383 71.7  -0.474  0.8839
-## 
-## trt = AEC:
-##  contrast        estimate    SE   df t.ratio p.value
-##  days0 - days21  -0.05374 0.350 70.0  -0.154  0.9871
-##  days0 - days42   0.00853 0.350 70.0   0.024  0.9997
-##  days21 - days42  0.06227 0.350 70.0   0.178  0.9827
-## 
-## Degrees-of-freedom method: kenward-roger 
-## P value adjustment: tukey method for comparing a family of 3 estimates</code></pre>
-<pre class="r"><code># Bees a priori
-
-emres_bees_apriori&lt;- emmeans(m.bee.apriori, pairwise ~ trt | days, type = &quot;response&quot;)$emmeans %&gt;% 
-  tidy()
-
-emmeans(m.bee.apriori, pairwise ~ trt | days, type = &quot;response&quot;)$contrasts</code></pre>
-<pre><code>## days = 0:
-##  contrast              estimate    SE   df t.ratio p.value
-##  Apivar - Apiguard_Api  -0.4149 0.672 69.7  -0.617  0.8113
-##  Apivar - AEC           -0.2016 0.662 69.7  -0.305  0.9502
-##  Apiguard_Api - AEC      0.2133 0.635 69.7   0.336  0.9398
-## 
-## days = 21:
-##  contrast              estimate    SE   df t.ratio p.value
-##  Apivar - Apiguard_Api   0.5262 0.672 69.7   0.783  0.7149
-##  Apivar - AEC           -0.9237 0.662 69.7  -1.396  0.3488
-##  Apiguard_Api - AEC     -1.4499 0.635 69.7  -2.283  0.0649
-## 
-## days = 42:
-##  contrast              estimate    SE   df t.ratio p.value
-##  Apivar - Apiguard_Api  -0.0533 0.701 78.5  -0.076  0.9968
-##  Apivar - AEC           -1.1852 0.679 75.1  -1.745  0.1955
-##  Apiguard_Api - AEC     -1.1318 0.648 73.9  -1.747  0.1950
-## 
-## Degrees-of-freedom method: kenward-roger 
-## P value adjustment: tukey method for comparing a family of 3 estimates</code></pre>
-<pre class="r"><code>confint(emmeans(m.bee.apriori, pairwise ~ trt | days, type = &quot;response&quot;))$contrasts</code></pre>
-<pre><code>## days = 0:
-##  contrast              estimate    SE   df lower.CL upper.CL
-##  Apivar - Apiguard_Api  -0.4149 0.672 69.7    -2.02    1.195
-##  Apivar - AEC           -0.2016 0.662 69.7    -1.79    1.384
-##  Apiguard_Api - AEC      0.2133 0.635 69.7    -1.31    1.734
-## 
-## days = 21:
-##  contrast              estimate    SE   df lower.CL upper.CL
-##  Apivar - Apiguard_Api   0.5262 0.672 69.7    -1.08    2.136
-##  Apivar - AEC           -0.9237 0.662 69.7    -2.51    0.661
-##  Apiguard_Api - AEC     -1.4499 0.635 69.7    -2.97    0.071
-## 
-## days = 42:
-##  contrast              estimate    SE   df lower.CL upper.CL
-##  Apivar - Apiguard_Api  -0.0533 0.701 78.5    -1.73    1.622
-##  Apivar - AEC           -1.1852 0.679 75.1    -2.81    0.439
-##  Apiguard_Api - AEC     -1.1318 0.648 73.9    -2.68    0.418
-## 
-## Degrees-of-freedom method: kenward-roger 
-## Confidence level used: 0.95 
-## Conf-level adjustment: tukey method for comparing a family of 3 estimates</code></pre>
-<pre class="r"><code># Brood
-
-
-
-emres_brood&lt;- emmeans(m.brood01, pairwise ~ trt | days, type = &quot;response&quot;)$emmeans %&gt;% 
-  tidy()
-
-emmeans(m.brood01, pairwise ~ trt | days, type = &quot;response&quot;)$contrasts</code></pre>
-<pre><code>## days = 0:
-##  contrast              estimate    SE  df t.ratio p.value
-##  Apivar - Apiguard_Api -0.26501 0.189 121  -1.402  0.3429
-##  Apivar - AEC          -0.26398 0.186 121  -1.418  0.3349
-##  Apiguard_Api - AEC     0.00103 0.179 121   0.006  1.0000
-## 
-## days = 10:
-##  contrast              estimate    SE  df t.ratio p.value
-##  Apivar - Apiguard_Api  0.39749 0.189 121   2.103  0.0934
-##  Apivar - AEC          -0.08690 0.186 121  -0.467  0.8870
-##  Apiguard_Api - AEC    -0.48439 0.179 121  -2.712  0.0208
-## 
-## days = 21:
-##  contrast              estimate    SE  df t.ratio p.value
-##  Apivar - Apiguard_Api -0.09835 0.189 121  -0.520  0.8615
-##  Apivar - AEC          -0.16357 0.186 121  -0.879  0.6548
-##  Apiguard_Api - AEC    -0.06522 0.179 121  -0.365  0.9292
-## 
-## days = 42:
-##  contrast              estimate    SE  df t.ratio p.value
-##  Apivar - Apiguard_Api  0.06537 0.204 130   0.321  0.9448
-##  Apivar - AEC          -0.17651 0.195 127  -0.904  0.6386
-##  Apiguard_Api - AEC    -0.24188 0.185 126  -1.304  0.3954
-## 
-## Degrees-of-freedom method: kenward-roger 
-## P value adjustment: tukey method for comparing a family of 3 estimates</code></pre>
-<pre class="r"><code>confint(emmeans(m.brood01, pairwise ~ trt | days, type = &quot;response&quot;))$contrasts</code></pre>
-<pre><code>## days = 0:
-##  contrast              estimate    SE  df lower.CL upper.CL
-##  Apivar - Apiguard_Api -0.26501 0.189 121   -0.713   0.1834
-##  Apivar - AEC          -0.26398 0.186 121   -0.706   0.1778
-##  Apiguard_Api - AEC     0.00103 0.179 121   -0.423   0.4249
-## 
-## days = 10:
-##  contrast              estimate    SE  df lower.CL upper.CL
-##  Apivar - Apiguard_Api  0.39749 0.189 121   -0.051   0.8459
-##  Apivar - AEC          -0.08690 0.186 121   -0.529   0.3549
-##  Apiguard_Api - AEC    -0.48439 0.179 121   -0.908  -0.0606
-## 
-## days = 21:
-##  contrast              estimate    SE  df lower.CL upper.CL
-##  Apivar - Apiguard_Api -0.09835 0.189 121   -0.547   0.3501
-##  Apivar - AEC          -0.16357 0.186 121   -0.605   0.2782
-##  Apiguard_Api - AEC    -0.06522 0.179 121   -0.489   0.3586
-## 
-## days = 42:
-##  contrast              estimate    SE  df lower.CL upper.CL
-##  Apivar - Apiguard_Api  0.06537 0.204 130   -0.418   0.5483
-##  Apivar - AEC          -0.17651 0.195 127   -0.639   0.2864
-##  Apiguard_Api - AEC    -0.24188 0.185 126   -0.682   0.1979
-## 
-## Degrees-of-freedom method: kenward-roger 
-## Confidence level used: 0.95 
-## Conf-level adjustment: tukey method for comparing a family of 3 estimates</code></pre>
-<pre class="r"><code># Note that we have a significant comparison here even though the inclusion of day:trt effect in the overall model was not significant.</code></pre>
+# On day 0, no significant differences (F ratio 2,Inf=0.004 , P=0.9957)
+# On day 21, yes significant differences (F ratio 2,Inf= 5.678, P=0.0034)
+# On day 42, no significant differences (F ratio 2,Inf= 0.427, P=0.6525)</code></pre>
 </div>
-<div id="summarize-models-for-plotting" class="section level1">
-<h1>Summarize models for plotting</h1>
-<pre class="r"><code>emplot_bees &lt;- emmip(m.bee1, trt~days, type = &quot;response&quot;, CIs = TRUE, plotit = FALSE)
-emplot_bees$days &lt;- as.numeric(as.character(emplot_bees$days))
-emplot_bees$trt &lt;- factor(emplot_bees$trt, levels = c(&quot;Apivar&quot;, &quot;AEC&quot;, &quot;Apiguard_Api&quot;))
-levels(emplot_bees$trt) # check order of factors</code></pre>
+</div>
+</div>
+<div id="summarize-models-for-text-tables-and-plotting" class="section level1">
+<h1>Summarize models for text, tables, and plotting</h1>
+<pre class="r"><code># Estimated marginal means (and CIs) for text, tables, and plotting
+# For the models which included an offset, report the emm&#39;s and CIs for a hypothetical sample of 100 bees
+# This method is based on the emmeans documentation at: https://cran.r-project.org/web/packages/emmeans/vignettes/sophisticated.html#offsets
+
+emplot_phor &lt;- emmip(m.phor.f, trt~days, type = &quot;response&quot;, CIs = TRUE, plotit = FALSE, offset = log(100))
+emplot_phor$days &lt;- as.numeric(as.character(emplot_phor$days))
+emplot_phor$trt &lt;- factor(emplot_phor$trt, levels = c(&quot;Apivar&quot;, &quot;AEC&quot;, &quot;Apiguard_Api&quot;))
+levels(emplot_phor$trt) # check order of factors</code></pre>
 <pre><code>## [1] &quot;Apivar&quot;       &quot;AEC&quot;          &quot;Apiguard_Api&quot;</code></pre>
-<pre class="r"><code>emplot_bees_apriori &lt;- emmip(m.bee.apriori, trt~days, type = &quot;response&quot;, CIs = TRUE, plotit = FALSE)
-emplot_bees_apriori$days &lt;- as.numeric(as.character(emplot_bees_apriori$days))
-emplot_bees_apriori$trt &lt;- factor(emplot_bees_apriori$trt, levels = c(&quot;Apivar&quot;, &quot;AEC&quot;, &quot;Apiguard_Api&quot;))
-levels(emplot_bees_apriori$trt) # check order of factors</code></pre>
+<pre class="r"><code>emplot_infest &lt;- emmip(m.infest.f, trt~days, type = &quot;response&quot;, CIs = TRUE, plotit = FALSE)
+emplot_infest$days &lt;- as.numeric(as.character(emplot_infest$days))
+emplot_infest$trt &lt;- factor(emplot_infest$trt, levels = c(&quot;Apivar&quot;, &quot;AEC&quot;, &quot;Apiguard_Api&quot;))
+levels(emplot_infest$trt) # check order of factors</code></pre>
 <pre><code>## [1] &quot;Apivar&quot;       &quot;AEC&quot;          &quot;Apiguard_Api&quot;</code></pre>
-<pre class="r"><code>emplot_brood &lt;- emmip(m.brood1, trt~days, type = &quot;response&quot;, CIs = TRUE, plotit = FALSE)
-emplot_brood$days &lt;- as.numeric(as.character(emplot_brood$days))
-emplot_brood$trt &lt;- factor(emplot_brood$trt, levels = c(&quot;Apivar&quot;, &quot;AEC&quot;, &quot;Apiguard_Api&quot;))
-levels(emplot_brood$trt) # check order of factors</code></pre>
-<pre><code>## [1] &quot;Apivar&quot;       &quot;AEC&quot;          &quot;Apiguard_Api&quot;</code></pre>
+<pre class="r"><code># This is simply the number of infested cells per 200 worker cells
+# Now scale this down to infested per 100 worker cells
+emplot_infest$yvar &lt;- emplot_infest$yvar/2
+emplot_infest$LCL &lt;- emplot_infest$LCL/2
+emplot_infest$UCL &lt;- emplot_infest$UCL/2</code></pre>
 </div>
 <div id="save-these-summarized-tables-of-model-estimates-to-their-own-csvs" class="section level1">
 <h1>Save these summarized tables of model estimates to their own
 CSVs</h1>
-<pre class="r"><code>write.csv(emplot_bees, &quot;../3 Plotting/data_analyzed/emplot_bees.csv&quot;)
-write.csv(emplot_bees_apriori, &quot;../3 Plotting/data_analyzed/emplot_bees_apriori.csv&quot;)
-write.csv(emplot_brood, &quot;../3 Plotting/data_analyzed/emplot_brood.csv&quot;)</code></pre>
+<pre class="r"><code>write.csv(emplot_phor, &quot;../3 Plotting/data_analyzed/emplot_phor.csv&quot;)
+write.csv(emplot_infest, &quot;../3 Plotting/data_analyzed/emplot_infest.csv&quot;)</code></pre>
+</div>
+<div id="post-hoc-comparisons" class="section level1">
+<h1>Post-hoc comparisons</h1>
+<pre class="r"><code># Phor within day
+emmeans(m.phor.f, pairwise ~ trt | days, type = &quot;response&quot;)$contrasts</code></pre>
+<pre><code>## days = 0:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 0.986 0.298 Inf    1  -0.045  0.9989
+##  Apivar / AEC          0.852 0.254 Inf    1  -0.535  0.8540
+##  Apiguard_Api / AEC    0.864 0.246 Inf    1  -0.512  0.8653
+## 
+## days = 21:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 1.935 0.685 Inf    1   1.865  0.1489
+##  Apivar / AEC          5.727 2.307 Inf    1   4.333  &lt;.0001
+##  Apiguard_Api / AEC    2.960 1.203 Inf    1   2.668  0.0208
+## 
+## days = 42:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 1.511 0.532 Inf    1   1.172  0.4697
+##  Apivar / AEC          0.738 0.242 Inf    1  -0.925  0.6244
+##  Apiguard_Api / AEC    0.488 0.155 Inf    1  -2.255  0.0624
+## 
+## P value adjustment: tukey method for comparing a family of 3 estimates 
+## Tests are performed on the log scale</code></pre>
+<pre class="r"><code>confint(emmeans(m.phor.f, pairwise ~ trt | days, type = &quot;response&quot;))$contrasts</code></pre>
+<pre><code>## days = 0:
+##  contrast              ratio    SE  df asymp.LCL asymp.UCL
+##  Apivar / Apiguard_Api 0.986 0.298 Inf     0.486      2.00
+##  Apivar / AEC          0.852 0.254 Inf     0.423      1.72
+##  Apiguard_Api / AEC    0.864 0.246 Inf     0.443      1.69
+## 
+## days = 21:
+##  contrast              ratio    SE  df asymp.LCL asymp.UCL
+##  Apivar / Apiguard_Api 1.935 0.685 Inf     0.844      4.44
+##  Apivar / AEC          5.727 2.307 Inf     2.228     14.72
+##  Apiguard_Api / AEC    2.960 1.203 Inf     1.141      7.68
+## 
+## days = 42:
+##  contrast              ratio    SE  df asymp.LCL asymp.UCL
+##  Apivar / Apiguard_Api 1.511 0.532 Inf     0.662      3.45
+##  Apivar / AEC          0.738 0.242 Inf     0.342      1.59
+##  Apiguard_Api / AEC    0.488 0.155 Inf     0.232      1.03
+## 
+## Confidence level used: 0.95 
+## Conf-level adjustment: tukey method for comparing a family of 3 estimates 
+## Intervals are back-transformed from the log scale</code></pre>
+<pre class="r"><code># Confirm that emmeans is using asymptotic degrees of freedom
+emmeans(m.phor.f, pairwise ~ trt | days, type = &quot;response&quot;)$contrasts</code></pre>
+<pre><code>## days = 0:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 0.986 0.298 Inf    1  -0.045  0.9989
+##  Apivar / AEC          0.852 0.254 Inf    1  -0.535  0.8540
+##  Apiguard_Api / AEC    0.864 0.246 Inf    1  -0.512  0.8653
+## 
+## days = 21:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 1.935 0.685 Inf    1   1.865  0.1489
+##  Apivar / AEC          5.727 2.307 Inf    1   4.333  &lt;.0001
+##  Apiguard_Api / AEC    2.960 1.203 Inf    1   2.668  0.0208
+## 
+## days = 42:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 1.511 0.532 Inf    1   1.172  0.4697
+##  Apivar / AEC          0.738 0.242 Inf    1  -0.925  0.6244
+##  Apiguard_Api / AEC    0.488 0.155 Inf    1  -2.255  0.0624
+## 
+## P value adjustment: tukey method for comparing a family of 3 estimates 
+## Tests are performed on the log scale</code></pre>
+<pre class="r"><code>emmeans(m.phor.f, pairwise ~ trt | days, type = &quot;response&quot;, lmer.df = &quot;asymptotic&quot;)$contrasts</code></pre>
+<pre><code>## days = 0:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 0.986 0.298 Inf    1  -0.045  0.9989
+##  Apivar / AEC          0.852 0.254 Inf    1  -0.535  0.8540
+##  Apiguard_Api / AEC    0.864 0.246 Inf    1  -0.512  0.8653
+## 
+## days = 21:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 1.935 0.685 Inf    1   1.865  0.1489
+##  Apivar / AEC          5.727 2.307 Inf    1   4.333  &lt;.0001
+##  Apiguard_Api / AEC    2.960 1.203 Inf    1   2.668  0.0208
+## 
+## days = 42:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 1.511 0.532 Inf    1   1.172  0.4697
+##  Apivar / AEC          0.738 0.242 Inf    1  -0.925  0.6244
+##  Apiguard_Api / AEC    0.488 0.155 Inf    1  -2.255  0.0624
+## 
+## P value adjustment: tukey method for comparing a family of 3 estimates 
+## Tests are performed on the log scale</code></pre>
+<pre class="r"><code># Yes, same results
+
+# Does Satterthwaite method work? No, defaults to asymptotic
+emmeans(m.phor.f, pairwise ~ trt | days, type = &quot;response&quot;)$contrasts</code></pre>
+<pre><code>## days = 0:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 0.986 0.298 Inf    1  -0.045  0.9989
+##  Apivar / AEC          0.852 0.254 Inf    1  -0.535  0.8540
+##  Apiguard_Api / AEC    0.864 0.246 Inf    1  -0.512  0.8653
+## 
+## days = 21:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 1.935 0.685 Inf    1   1.865  0.1489
+##  Apivar / AEC          5.727 2.307 Inf    1   4.333  &lt;.0001
+##  Apiguard_Api / AEC    2.960 1.203 Inf    1   2.668  0.0208
+## 
+## days = 42:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 1.511 0.532 Inf    1   1.172  0.4697
+##  Apivar / AEC          0.738 0.242 Inf    1  -0.925  0.6244
+##  Apiguard_Api / AEC    0.488 0.155 Inf    1  -2.255  0.0624
+## 
+## P value adjustment: tukey method for comparing a family of 3 estimates 
+## Tests are performed on the log scale</code></pre>
+<pre class="r"><code>emmeans(m.phor.f, pairwise ~ trt | days, type = &quot;response&quot;, lmer.df = &quot;satterthwaite&quot;)$contrasts</code></pre>
+<pre><code>## days = 0:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 0.986 0.298 Inf    1  -0.045  0.9989
+##  Apivar / AEC          0.852 0.254 Inf    1  -0.535  0.8540
+##  Apiguard_Api / AEC    0.864 0.246 Inf    1  -0.512  0.8653
+## 
+## days = 21:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 1.935 0.685 Inf    1   1.865  0.1489
+##  Apivar / AEC          5.727 2.307 Inf    1   4.333  &lt;.0001
+##  Apiguard_Api / AEC    2.960 1.203 Inf    1   2.668  0.0208
+## 
+## days = 42:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 1.511 0.532 Inf    1   1.172  0.4697
+##  Apivar / AEC          0.738 0.242 Inf    1  -0.925  0.6244
+##  Apiguard_Api / AEC    0.488 0.155 Inf    1  -2.255  0.0624
+## 
+## P value adjustment: tukey method for comparing a family of 3 estimates 
+## Tests are performed on the log scale</code></pre>
+<pre class="r"><code># Infest within day
+emmeans(m.infest.f, pairwise ~ trt | days, type = &quot;response&quot;)$contrasts</code></pre>
+<pre><code>## days = 0:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 1.017 0.275 Inf    1   0.063  0.9978
+##  Apivar / AEC          0.994 0.264 Inf    1  -0.023  0.9997
+##  Apiguard_Api / AEC    0.977 0.249 Inf    1  -0.091  0.9955
+## 
+## days = 21:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 2.178 0.659 Inf    1   2.572  0.0273
+##  Apivar / AEC          2.515 0.743 Inf    1   3.122  0.0051
+##  Apiguard_Api / AEC    1.155 0.358 Inf    1   0.465  0.8876
+## 
+## days = 42:
+##  contrast              ratio    SE  df null z.ratio p.value
+##  Apivar / Apiguard_Api 0.787 0.240 Inf    1  -0.783  0.7133
+##  Apivar / AEC          0.984 0.289 Inf    1  -0.054  0.9984
+##  Apiguard_Api / AEC    1.250 0.344 Inf    1   0.812  0.6958
+## 
+## P value adjustment: tukey method for comparing a family of 3 estimates 
+## Tests are performed on the log scale</code></pre>
+<pre class="r"><code>confint(emmeans(m.infest.f, pairwise ~ trt | days, type = &quot;response&quot;))$contrasts</code></pre>
+<pre><code>## days = 0:
+##  contrast              ratio    SE  df asymp.LCL asymp.UCL
+##  Apivar / Apiguard_Api 1.017 0.275 Inf     0.539      1.92
+##  Apivar / AEC          0.994 0.264 Inf     0.533      1.85
+##  Apiguard_Api / AEC    0.977 0.249 Inf     0.537      1.78
+## 
+## days = 21:
+##  contrast              ratio    SE  df asymp.LCL asymp.UCL
+##  Apivar / Apiguard_Api 2.178 0.659 Inf     1.072      4.43
+##  Apivar / AEC          2.515 0.743 Inf     1.258      5.03
+##  Apiguard_Api / AEC    1.155 0.358 Inf     0.559      2.39
+## 
+## days = 42:
+##  contrast              ratio    SE  df asymp.LCL asymp.UCL
+##  Apivar / Apiguard_Api 0.787 0.240 Inf     0.385      1.61
+##  Apivar / AEC          0.984 0.289 Inf     0.494      1.96
+##  Apiguard_Api / AEC    1.250 0.344 Inf     0.656      2.38
+## 
+## Confidence level used: 0.95 
+## Conf-level adjustment: tukey method for comparing a family of 3 estimates 
+## Intervals are back-transformed from the log scale</code></pre>
 </div>
 
 

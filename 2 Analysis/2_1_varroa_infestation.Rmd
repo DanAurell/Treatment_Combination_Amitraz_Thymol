@@ -1,5 +1,5 @@
 ---
-title: "1_Varroa_infestation_2023-05-22"
+title: "2.1 Varroa Infestation"
 author: "Dan Aurell"
 date: "2023-05-22"
 output:   
@@ -58,6 +58,8 @@ tempdatum <- datum %>%
          )
 
 # Simple sample size calculation to respond to reviewer
+# These were manually entered into table generated in the Plotting folder
+
 # Relevant variables with same n: trt days mites_recov_3_washes bees
 
 tempdatum %>% 
@@ -134,12 +136,6 @@ summary(m.phor.nb1)
 ```
 
 
-Plot residuals and see if it's zero-inflated.
-
-```{r}
-
-```
-
 Comparing nb to poisson with deviance F-test
 ```{r}
 # Test whether nb is a stat sig better fit than poisson:
@@ -174,8 +170,8 @@ m.phor <- glmer.nb(mites_recov_3_washes ~
                      offset(log(est_bee_num_by_wt_floor)) +
                      (1 | col_no),
                    data = tempdatum)
-summary(m.phor) # Very different coefficients... because varroa per bee rather than per sample...
-  # Check on this interpretation
+summary(m.phor) 
+# I need to provide a value of the offset when making predictions from the model
 
 
 # Test significance of trt:days interaction
@@ -198,7 +194,8 @@ anova(m.phor, m.phor.0)
 m.phor.f <- m.phor
 ```
 
-### ANOVA of phor within day
+### Joint tests of phor within day (Like ANOVA of phor within day)
+Added step based on reviewer comment
 
 ```{r}
 #joint_tests(m.phor, by = "days") 
@@ -222,34 +219,6 @@ test(con.phor.f, joint = TRUE, by = "days")
 
 ```
 
-
-On day X, yes/no significant differences between treatments (F = , P= )
-
-```{r}
-m.phor_day0 <- glm.nb(mites_recov_3_washes ~ 
-                     trt + 
-                     offset(log(est_bee_num_by_wt_floor)),
-                   data = tempdatum, subset = days == 0)
-summary(aov(m.phor_day0))
-
-# On day 0, no significant differences between treatments (F 2,38 = 0.165, P=0.849)
-
-m.phor_day21 <- glm.nb(mites_recov_3_washes ~ 
-                     trt + 
-                     offset(log(est_bee_num_by_wt_floor)),
-                   data = tempdatum, subset = days == 21)
-summary(aov(m.phor_day21))
-# On day 21, yes significant differences between treatments (F 2,38 = 6.674, P= 0.00328)
-
-m.phor_day42 <- glm.nb(mites_recov_3_washes ~ 
-                     trt + 
-                     offset(log(est_bee_num_by_wt_floor)),
-                   data = tempdatum, subset = days == 42)
-summary(aov(m.phor_day42))
-
-# On day 42, no significant differences between treatments (F 2,34= 1.723, P= 0.194)
-
-```
 
 
 
@@ -287,19 +256,21 @@ m.infest.nb0 <- glmer.nb(infest_200 ~
                    data = tempdatum)
 
 anova(m.infest.nb1, m.infest.nb0)
+# We found a significant interaction of treatment × experiment day on infestation rate of capped
+# worker brood (ChiSq 4=9.74, P=0.045)
+
 
 # Final model
 m.infest.f <- m.infest.nb1
 
 ```
 
-### ANOVA of infest within day
+
+### Joint tests of infest within day (Like ANOVA of infest within day)
+Added step based on reviewer comment
 
 ```{r}
-joint_tests(m.infest.f) 
-# Does not give a duplicate row names error
-
-# By doing this within days, this may be the ANOVA F test that the reviewer asks for
+joint_tests(m.infest.f) # Does not give a duplicate row names error
 
 joint_tests(m.infest.f, by = "days") 
 
@@ -313,38 +284,6 @@ test(con.infest.f, joint = TRUE, by = "days")
 # On day 21, yes significant differences (F ratio 2,Inf= 5.678, P=0.0034)
 # On day 42, no significant differences (F ratio 2,Inf= 0.427, P=0.6525)
 ```
-
-
-On day X, yes/no significant differences between treatments (F = , P= )
-
-
-
-```{r}
-m.infest_day0 <- glm.nb(infest_200 ~ 
-                     trt,
-                   data = tempdatum, subset = days == 0)
-summary(aov(m.infest_day0))
-
-# On day 0, no significant differences between treatments (F 2,38= 0.001, P= 0.999)
-
-m.infest_day21 <- glm.nb(infest_200 ~ 
-                     trt,
-                   data = tempdatum, subset = days == 21)
-summary(aov(m.infest_day21))
-
-# On day 21, yes significant differences between treatments (F 2,29= 6.348, P= 0.00517)
-
-m.infest_day42 <- glm.nb(infest_200 ~ 
-                     trt,
-                   data = tempdatum, subset = days == 42)
-summary(aov(m.infest_day42))
-
-# On day 42, no significant differences between treatments (F 2,34= 0.353, P= 0.705)
-
-```
-
-
-
 
 
 
@@ -388,29 +327,18 @@ write.csv(emplot_infest, "../3 Plotting/data_analyzed/emplot_infest.csv")
 emmeans(m.phor.f, pairwise ~ trt | days, type = "response")$contrasts
 confint(emmeans(m.phor.f, pairwise ~ trt | days, type = "response"))$contrasts
 
-# Added to test idea that the emmeans is using asymptotic degrees of freedom
+# Confirm that emmeans is using asymptotic degrees of freedom
 emmeans(m.phor.f, pairwise ~ trt | days, type = "response")$contrasts
 emmeans(m.phor.f, pairwise ~ trt | days, type = "response", lmer.df = "asymptotic")$contrasts
 # Yes, same results
 
-# Does Satterthwaite method work? Nope, defaults to asymptotic
+# Does Satterthwaite method work? No, defaults to asymptotic
 emmeans(m.phor.f, pairwise ~ trt | days, type = "response")$contrasts
 emmeans(m.phor.f, pairwise ~ trt | days, type = "response", lmer.df = "satterthwaite")$contrasts
-
-
-# Phor within treatment
-emmeans(m.phor.f, pairwise ~ days | trt, type = "response")$contrasts
-confint(emmeans(m.phor.f, pairwise ~ days | trt, type = "response"))$contrasts
-
 
 # Infest within day
 emmeans(m.infest.f, pairwise ~ trt | days, type = "response")$contrasts
 confint(emmeans(m.infest.f, pairwise ~ trt | days, type = "response"))$contrasts
-
-# Infest within treatment
-emmeans(m.infest.f, pairwise ~ days | trt, type = "response")$contrasts
-confint(emmeans(m.infest.f, pairwise ~ days | trt, type = "response"))$contrasts
-
 
 ```
 

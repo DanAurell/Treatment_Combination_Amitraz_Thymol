@@ -16,9 +16,7 @@ library(ggpubr)
 
 Required to read in
 
-
 ```{r}
-
 emplot_phor <- read.csv("./data_analyzed/emplot_phor.csv")
 emplot_infest <- read.csv("./data_analyzed/emplot_infest.csv")
 emplot_bees <- read.csv("./data_analyzed/emplot_bees.csv")
@@ -26,16 +24,7 @@ emplot_brood <- read.csv("./data_analyzed/emplot_brood.csv")
 emplot_prop <- read.csv("./data_analyzed/emplot_prop.csv")
 ```
 
-
-
-
-
 # Combining plots
-
-Trying to save as TIFFs
-80mm wide
-60mm tall
-600 dpi
 
 ## Use ggarrange to make combo plots for Varroa parameters
 ```{r}
@@ -116,9 +105,6 @@ ggsave("outputs/2023-12-04_tiff_combo/varroa 2023-12-04.tiff", width = 16, heigh
 
 ## Use ggarrange to make combo plots for colony strength parameters
 
-Graphical settings in 2023-05-02 versions of these graphs:
-
-
 ```{r}
 # STRENGTH
 p2a <- emplot_bees %>% 
@@ -198,9 +184,5 @@ ggplot(mapping = aes(y = yvar, x = days, color = trt)) +
 
 ggarrange(p2a, p2b, ncol = 1, nrow = 2, labels = "AUTO", font.label = list(size = 30), common.legend = TRUE, legend = "right")
 
-
-
-
 ggsave("outputs/2023-12-04_tiff_combo/strength 2023-12-04.tiff", width = 16, height = 17.25, units = "in")
-
 ```

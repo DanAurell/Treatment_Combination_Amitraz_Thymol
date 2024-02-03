@@ -1,5 +1,5 @@
 ---
-title: "Data Preparation"
+title: "1.1 Data Preparation"
 author: "Dan Aurell"
 date: "2023-04-05"
 output:   
@@ -43,10 +43,10 @@ datum <- datum_orig %>%
                                           ifelse(time_point == 34, 138, NA))))),
     est_bee_num_by_wt_floor = floor(est_bee_num_by_wt),
     bees_without_mites = est_bee_num_by_wt_floor-mites_recov_3_washes,
-    bees_frames = bees_tot_sides/2, # expressed in frames
-    wk_frames = wk_capbrd_tot_sides/2, # expressed in frames
-    honey_frames = revised_honey_tot_sides/2, # expressed in frames
-    pollen_frames = revised_pollen_tot_sides/2, # expressed in frames
+    bees_frames = bees_tot_sides/2, # now expressed in frames
+    wk_frames = wk_capbrd_tot_sides/2, # now expressed in frames
+    honey_frames = revised_honey_tot_sides/2, # now expressed in frames
+    pollen_frames = revised_pollen_tot_sides/2, # now expressed in frames
     phor2 = 100*mites_recov_3_washes/est_bee_num_by_wt, # make unrounded variable for phor
     cap_brd_indiv = dr_capbrd_cells_num + wk_cells, 
     indiv_total = cap_brd_indiv + bees, # Make a composite variable of both brood and bees
@@ -99,10 +99,10 @@ datum <- datum_orig %>%
   filter(days %in% c(0, 10, 21, 42, 138),
          (col_no != "C15" | days != "42") # Remove row for a deadout on Day 42
          )
-datum[sapply(datum, is.infinite)] <- NA
+datum[sapply(datum, is.infinite)] <- NA # To remove Inf as value in cells
 datum[sapply(datum, is.nan)] <- NA
 
-# That got rid of the infinite value cells
+
 ```
 
 
@@ -116,7 +116,7 @@ qless <- c("D8", "RC1", "D21", "D24", "C6", "BC15")
 ```
 
 
-How many Christian OA colonies were in each treatment group?
+How many colonies in each treatment group came from the repeated-OA vapor trial?
 ```{r}
 datum %>% 
   filter(col_hist == "Christian OA")
@@ -164,7 +164,7 @@ datum$days <- factor(datum$days)
 ### Make new pre-treatment columns
 
 Make a column of pre-treatment values for each variable of interest.
-In order to do ANCOVA-POST and to include as predictors in mixed modeling:
+In order to do ANCOVA-POST if I wish to - and to include as predictors in mixed modeling:
 
 ```{r}
 # Extract row based on colony number of row i and day = 0
@@ -226,14 +226,6 @@ for(i in 1:nrow(datum)) {
 # cdb_num_sides_obs
 
 
-```
-
-
-
-prep datum for graphing - necessary?
-```{r}
-# datum_cont <- datum
-# datum_cont$days <- as.numeric(as.character(datum_cont$days))
 ```
 
 Save datum as a .csv

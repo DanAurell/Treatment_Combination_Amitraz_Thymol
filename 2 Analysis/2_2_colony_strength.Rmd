@@ -1,13 +1,11 @@
 ---
-title: "3_colony_strength_2023-05-22"
+title: "2.2 Colony Strength"
 author: "Dan Aurell"
 date: "2023-05-22"
 output:   
   html_document: 
     keep_md: yes
 ---
-
-# Last modified
 
 # Setup
 
@@ -67,26 +65,6 @@ m.bee.a <- lmer(bees_frames ~
                  trt:days +
                  (1 | col_no), data = tempdatum)
 summary(m.bee.a) # 119 obs, 41 groups
-
-# I think the inclusion of the random effect of colony number is essential to avoid pseudoreplication, but Zach seemed to think it may be a case of overfitting
-
-# Let's test out an alternate model
-m.bee.alm <- lm(bees_frames ~ 
-                 trt + 
-                 days + 
-                 trt:days, 
-                data = tempdatum)
-summary(m.bee.alm) # 110 degrees of freedom
-
-# What's our true number of samples for the effect of time, the effect of treatment, and the time x treatment interaction? Refer back to Steury notes
-
-# Temporal pseudoreplication
-# Repeated measures design
-# lm(Height ~ Age + Sex) # Pseudoreplicated with respect to Sex, but not Age
-# Interactions not discussed
-# Relevant to winter trial - Usually you don’t have to include random effects but doing so lets you incraese your power
-
-
 
 # Check deletion of interaction (ML)
 m.bee.a.ML <- lmer(bees_frames ~ 
@@ -164,32 +142,6 @@ joint_tests(m.bee.f, by = "days")
 ```
 
 
-On day X, yes/no significant differences between treatments (F = , P= )
-
-```{r}
-m.bee_day0 <- lm(bees_frames ~ trt + pre_phor2,
-                 data = tempdatum, subset = days == 0)
-summary(aov(m.bee_day0))
-
-# On day 0, no significant differences between treatments (F 2,37 = 0.310, P=0.7353)
-
-m.bee_day21 <- lm(bees_frames ~ trt + pre_phor2,
-                 data = tempdatum, subset = days == 21)
-summary(aov(m.bee_day21))
-
-# On day 21, yes significant differences between treatments (F 2,37= 4.124, P= 0.0242)
-
-m.bee_day42 <- lm(bees_frames ~ trt + pre_phor2,
-                 data = tempdatum, subset = days == 42)
-summary(aov(m.bee_day42))
-
-
-# On day 42, no significant differences between treatments (F 2,33= 1.891, P= 0.167)
-  # This is a bit surprising since it's at odds with the emmeans analysis
-```
-
-
-
 ## Population of capped worker brood
 
 ```{r}
@@ -224,7 +176,7 @@ m.brood.a0 <- lmer(wk_frames ~
                   (1 | col_no), 
                  data = tempdatum)
 
-anova(m.brood.a, m.brood.a0) # No need any more to specify ML models
+anova(m.brood.a, m.brood.a0)
 
 # We did not find a significant interaction between treatment and days on worker brood population (ChiSq[6]=10.766; P=0.09588), but because of our experiment designed to examine this effect, we retained the interaction in the model anyway.
 
@@ -249,7 +201,7 @@ m.brood.a000 <- lmer(wk_frames ~
                    # trt:days + 
                   (1 | col_no), 
                  data = tempdatum)
-# DAN Singular
+# Singular fit, but this isn't a model I'm deriving estimates from.
 
 anova(m.brood.a0, m.brood.a000)
 # Significant effect of days (Chisq[3]=192.35, P<2.2e-16).
@@ -320,7 +272,6 @@ anova(m.brood.1)
 # Final model
 
 # Preferred model: m.brood.1.ML
-# Make REML version
 m.brood.1 <- lmer(wk_frames ~ 
                    trt + 
                    days + 
@@ -398,10 +349,6 @@ confint(emmeans(m.bee.f, pairwise ~ trt | days, type = "response"))$contrasts
 
 
 
-
-## Over time
-emmeans(m.bee.f, pairwise ~ days | trt, type = "response")$contrasts
-
 # Bees a priori
 
 emres_bees_apriori<- emmeans(m.bee.a, pairwise ~ trt | days, type = "response")$emmeans %>% 
@@ -419,7 +366,7 @@ emres_brood<- emmeans(m.brood.f, pairwise ~ trt | days, type = "response")$emmea
 
 emmeans(m.brood.f, pairwise ~ trt | days, type = "response")$contrasts
 confint(emmeans(m.brood.f, pairwise ~ trt | days, type = "response"))$contrasts
-# Note that we have a significant comparison here even though the inclusion of day:trt effect in the overall model was not significant.
+# Note that the inclusion of day:trt effect in the overall model was not significant.
 ```
 
 # Summarize models for plotting

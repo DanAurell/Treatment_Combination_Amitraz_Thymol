@@ -2,6 +2,10 @@
 
 Data and analysis code for an experiment on control of Varroa mites in honey bee colonies using a combination of treatments based on amitraz and thymol. Research by Dan Aurell, Clint Wall, Selina Bruckner, and Geoffrey R. Williams.
 
+### DOI
+
+DOI: 10.5281/zenodo.10612431
+
 
 ### Citation
 
